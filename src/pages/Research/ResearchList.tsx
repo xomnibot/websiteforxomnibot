@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -17,8 +18,20 @@ const categories = [
 ];
 
 export const ResearchListPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  useEffect(() => {
+    if (categoryParam) {
+      const matched = categories.find((c) => c.toLowerCase() === categoryParam.toLowerCase());
+      if (matched) {
+        setSelectedCategory(matched);
+      }
+    }
+  }, [categoryParam]);
 
   const allResearch = contentService.getResearchPapers();
 

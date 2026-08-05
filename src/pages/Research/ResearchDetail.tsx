@@ -4,11 +4,10 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { Tag } from '@/components/common/Tag';
 import { TableOfContents, TOCItem } from '@/components/navigation/TableOfContents';
-import { CodeBlock } from '@/components/markdown/CodeBlock';
-import { Callout } from '@/components/markdown/Callout';
 import { contentService } from '@/services/contentService';
 import { BookOpen, Clock, Calendar, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { marked } from 'marked';
 
 export const ResearchDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -96,60 +95,12 @@ export const ResearchDetailPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Section 2: Root Cause */}
-          <div id="root-cause" className="space-y-4 pt-4 border-t border-border">
-            <h2 className="text-xl font-bold font-heading text-foreground">Root Cause Analysis</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Detailed inspection of memory management routines in vulnerable Kernel/Engine versions:
-            </p>
-
-            <CodeBlock
-              language="c"
-              filename="kernel_netfilter_vulnerable.c"
-              code={`// Vulnerable kernel snippet (nf_tables_api.c)
-static int nf_tables_delsetelem(struct net *net, struct sock *nlsk, ...) {
-    // Missing atomic_inc(&set->refcnt) before releasing lock
-    nft_set_elem_destroy(set, elem, true);
-    // Dangling reference stored in batch context
-    return 0;
-}`}
-            />
-          </div>
-
-          {/* Section 3: Exploitation */}
-          <div id="exploitation" className="space-y-4 pt-4 border-t border-border">
-            <h2 className="text-xl font-bold font-heading text-foreground">Exploit Primitive Construction</h2>
-            <Callout type="important" title="Modprobe Overwrite Strategy">
-              Overwriting `modprobe_path` allows executing an arbitrary shell script when a non-standard socket family is triggered.
-            </Callout>
-
-            <CodeBlock
-              language="bash"
-              filename="trigger_modprobe.sh"
-              code={`#!/bin/bash
-# Craft payload script at /tmp/root_shell.sh
-echo '#!/bin/sh' > /tmp/x.sh
-echo 'chmod u+s /bin/bash' >> /tmp/x.sh
-chmod +x /tmp/x.sh
-
-# Trigger modprobe by executing invalid binary header
-socket(AF_INET, SOCK_DGRAM, 0x1337);`}
-            />
-          </div>
-
-          {/* Section 4: Patch */}
-          <div id="patch" className="space-y-4 pt-4 border-t border-border">
-            <h2 className="text-xl font-bold font-heading text-foreground">Patch Diffing & Remediation</h2>
-            <CodeBlock
-              language="diff"
-              filename="upstream_fix.patch"
-              code={`- nft_set_elem_destroy(set, elem, true);
-+ if (nft_set_elem_active(set, elem)) {
-+     atomic_inc(&set->refcnt);
-+     nft_set_elem_destroy(set, elem, true);
-+ }`}
-            />
-          </div>
+          {/* Section 2: Content Body */}
+          <div
+            id="root-cause"
+            className="space-y-4 pt-4 border-t border-border prose dark:prose-invert max-w-none text-sm leading-relaxed text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: marked.parse(paper.content || '') }}
+          />
 
           <div className="pt-8 border-t border-border">
             <Link to="/research">

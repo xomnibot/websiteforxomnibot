@@ -4,11 +4,11 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { Tag } from '@/components/common/Tag';
 import { TableOfContents, TOCItem } from '@/components/navigation/TableOfContents';
-import { CodeBlock } from '@/components/markdown/CodeBlock';
 import { Callout } from '@/components/markdown/Callout';
 import { contentService } from '@/services/contentService';
 import { ShieldAlert, Clock, Calendar, Wrench, CheckCircle2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { marked } from 'marked';
 
 export const WriteupDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -117,31 +117,11 @@ export const WriteupDetailPage: React.FC = () => {
           )}
 
           {/* Main Body Markdown Content */}
-          <div id="reconnaissance" className="prose dark:prose-invert max-w-none text-sm leading-relaxed space-y-6 pt-4">
-            <h2 className="text-xl font-bold font-heading text-foreground">Reconnaissance & Technical Exploitation</h2>
-            <p className="text-muted-foreground">
-              Executing initial enumeration against target endpoints reveals the parameter handling logic:
-            </p>
-
-            <CodeBlock
-              language="http"
-              filename="authorization_request.http"
-              code={`GET /auth?client_id=xomnibot_app&redirect_uri=https://client.xomnibot.in/callback&response_type=token HTTP/1.1
-Host: oauth.target.internal
-User-Agent: Mozilla/5.0 (X11; Linux x86_64)`}
-            />
-
-            <Callout type="warning" title="Open Redirect Risk">
-              Always test for path traversal within `redirect_uri` parameters before attempting full token exfiltration.
-            </Callout>
-
-            <CodeBlock
-              language="bash"
-              filename="exploit_listener.sh"
-              code={`# Start Flask OAuth Exploit Token Harvester
-python3 -m http.server 8080 --bind 0.0.0.0`}
-            />
-          </div>
+          <div
+            id="reconnaissance"
+            className="prose dark:prose-invert max-w-none text-sm leading-relaxed space-y-6 pt-4 text-muted-foreground border-t border-border"
+            dangerouslySetInnerHTML={{ __html: marked.parse(writeup.content || '') }}
+          />
 
           {/* Defensive Perspective */}
           <div id="mitigation" className="pt-6 border-t border-border space-y-3">

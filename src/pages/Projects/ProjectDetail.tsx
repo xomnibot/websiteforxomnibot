@@ -10,6 +10,7 @@ import { TableOfContents, TOCItem } from '@/components/navigation/TableOfContent
 import { contentService } from '@/services/contentService';
 import { GithubIcon } from '@/components/common/SocialIcons';
 import { Code2, Star, CheckCircle, ArrowLeft, Terminal } from 'lucide-react';
+import { marked } from 'marked';
 
 export const ProjectDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -95,9 +96,10 @@ export const ProjectDetailPage: React.FC = () => {
           {/* Section 1: Overview */}
           <div id="overview" className="space-y-3">
             <h2 className="text-xl font-bold font-heading text-foreground">Project Overview</h2>
-            <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
-              <p>{project.content}</p>
-            </div>
+            <div
+              className="text-sm text-muted-foreground leading-relaxed space-y-3 prose dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: marked.parse(project.content || '') }}
+            />
           </div>
 
           {/* Section 2: Features */}

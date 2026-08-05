@@ -7,6 +7,7 @@ import { TableOfContents, TOCItem } from '@/components/navigation/TableOfContent
 import { contentService } from '@/services/contentService';
 import { BookOpen, Clock, Calendar, ArrowLeft } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { marked } from 'marked';
 
 export const BlogDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -66,16 +67,11 @@ export const BlogDetailPage: React.FC = () => {
             </p>
           </div>
 
-          <div id="methodology" className="space-y-4 pt-4 border-t border-border prose dark:prose-invert max-w-none text-sm leading-relaxed">
-            <p className="text-muted-foreground">
-              Developing a consistent research habit requires removing friction from note-taking and target tracking:
-            </p>
-            <ul className="space-y-2 text-muted-foreground list-disc pl-5">
-              <li>Maintain immutable command logs for every active terminal session.</li>
-              <li>Tag vulnerability types consistently across personal knowledge bases.</li>
-              <li>Automate passive sub-domain discovery pipelines.</li>
-            </ul>
-          </div>
+          <div
+            id="methodology"
+            className="space-y-4 pt-4 border-t border-border prose dark:prose-invert max-w-none text-sm leading-relaxed text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: marked.parse(post.content || '') }}
+          />
 
           <div className="pt-8 border-t border-border">
             <Link to="/blog">
