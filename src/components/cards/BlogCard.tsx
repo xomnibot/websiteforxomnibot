@@ -17,7 +17,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
           <Tag variant="green" size="sm">
             {post.category}
           </Tag>
-          <span className="text-[11px] font-mono text-muted-foreground">
+          <span className="text-[11px] font-mono text-muted-foreground whitespace-nowrap shrink-0">
             {formatDate(post.date)}
           </span>
         </div>

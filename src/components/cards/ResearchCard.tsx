@@ -13,8 +13,8 @@ export const ResearchCard: React.FC<ResearchCardProps> = ({ paper }) => {
   return (
     <article className="group relative flex flex-col justify-between rounded-xl glass-panel p-5 border border-border hover:border-cyan-500/40 transition-all duration-300 hover:shadow-cyan-glow">
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
             <Tag variant="cyan" size="sm">
               {paper.category}
             </Tag>
@@ -24,7 +24,7 @@ export const ResearchCard: React.FC<ResearchCardProps> = ({ paper }) => {
               </span>
             )}
           </div>
-          <span className="text-[11px] font-mono text-muted-foreground">
+          <span className="text-[11px] font-mono text-muted-foreground whitespace-nowrap shrink-0">
             {formatDate(paper.date)}
           </span>
         </div>

@@ -24,7 +24,7 @@ export const WriteupCard: React.FC<WriteupCardProps> = ({ writeup }) => {
               {writeup.difficulty}
             </Tag>
           </div>
-          <span className="text-[11px] font-mono text-muted-foreground">
+          <span className="text-[11px] font-mono text-muted-foreground whitespace-nowrap shrink-0">
             {formatDate(writeup.date)}
           </span>
         </div>
