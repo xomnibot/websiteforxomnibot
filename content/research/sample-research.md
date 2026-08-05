@@ -12,6 +12,7 @@ tags:
 summary: "Deep dive analysis of an OAuth 2.0 redirect parameter validation flaw allowing attackers to hijack authentication codes via wildcard domain matching."
 readingTime: "12 min read"
 featured: true
+featuredImage: "/research/cve-2026-1337-banner.png"
 impact: "Critical (CVSS 9.8)"
 affectedSystems: "OAuth 2.0 Auth Servers v1.0.0 - v2.4.1"
 ---
