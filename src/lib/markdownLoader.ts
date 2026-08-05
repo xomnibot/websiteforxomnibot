@@ -1,3 +1,4 @@
+import yaml from 'js-yaml';
 import { Writeup, ResearchPaper, Project, BlogPost, Cheatsheet } from '@/types/content';
 
 export interface ParsedMarkdown<T = Record<string, any>> {
@@ -13,63 +14,24 @@ export function parseFrontmatter<T = Record<string, any>>(rawMarkdown: string): 
 
   const yamlStr = match[1];
   const content = match[2].trim();
-  const metadata: Record<string, any> = {};
+  let metadata: Record<string, any> = {};
 
-  let currentKey: string | null = null;
-  let currentList: string[] | null = null;
-
-  yamlStr.split(/\r?\n/).forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) return;
-
-    if (trimmed.startsWith('- ') && currentKey) {
-      const val = trimmed.slice(2).trim().replace(/^["']|["']$/g, '');
-      if (!currentList) currentList = [];
-      currentList.push(val);
-      metadata[currentKey] = currentList;
-      return;
+  try {
+    const parsed = yaml.load(yamlStr);
+    if (parsed && typeof parsed === 'object') {
+      metadata = parsed as Record<string, any>;
     }
-
-    currentList = null;
-    const colonIdx = line.indexOf(':');
-    if (colonIdx !== -1) {
-      const key = line.slice(0, colonIdx).trim();
-      let rawVal = line.slice(colonIdx + 1).trim();
-
-      if ((rawVal.startsWith('"') && rawVal.endsWith('"')) || (rawVal.startsWith("'") && rawVal.endsWith("'"))) {
-        rawVal = rawVal.slice(1, -1);
-      }
-
-      if (rawVal.startsWith('[') && rawVal.endsWith(']')) {
-        try {
-          metadata[key] = JSON.parse(rawVal);
-        } catch {
-          metadata[key] = rawVal
-            .slice(1, -1)
-            .split(',')
-            .map((s) => s.trim().replace(/^["']|["']$/g, ''))
-            .filter(Boolean);
-        }
-      } else if (rawVal === 'true') {
-        metadata[key] = true;
-      } else if (rawVal === 'false') {
-        metadata[key] = false;
-      } else if (!isNaN(Number(rawVal)) && rawVal !== '') {
-        metadata[key] = Number(rawVal);
-      } else {
-        metadata[key] = rawVal;
-        currentKey = key;
-      }
-    }
-  });
+  } catch (err) {
+    console.error('YAML frontmatter parse error:', err);
+  }
 
   return { metadata: metadata as T, content };
 }
 
-// Loaders for each content type supporting subfolders & .md / .mdx
+// Single root `/content/` loaders supporting subfolders & .md / .mdx
 export function loadWriteupsFromMarkdown(): Writeup[] {
   const files = import.meta.glob<string>(
-    ['/src/content/writeups/**/*.{md,mdx}', '/content/writeups/**/*.{md,mdx}', '/content/writeup/**/*.{md,mdx}'],
+    ['/content/writeups/**/*.{md,mdx}', '/content/writeup/**/*.{md,mdx}'],
     { query: '?raw', eager: true, import: 'default' }
   );
 
@@ -104,7 +66,7 @@ export function loadWriteupsFromMarkdown(): Writeup[] {
 
 export function loadResearchFromMarkdown(): ResearchPaper[] {
   const files = import.meta.glob<string>(
-    ['/src/content/research/**/*.{md,mdx}', '/content/research/**/*.{md,mdx}'],
+    '/content/research/**/*.{md,mdx}',
     { query: '?raw', eager: true, import: 'default' }
   );
 
@@ -137,7 +99,7 @@ export function loadResearchFromMarkdown(): ResearchPaper[] {
 
 export function loadProjectsFromMarkdown(): Project[] {
   const files = import.meta.glob<string>(
-    ['/src/content/projects/**/*.{md,mdx}', '/content/projects/**/*.{md,mdx}'],
+    '/content/projects/**/*.{md,mdx}',
     { query: '?raw', eager: true, import: 'default' }
   );
 
@@ -173,7 +135,7 @@ export function loadProjectsFromMarkdown(): Project[] {
 
 export function loadBlogPostsFromMarkdown(): BlogPost[] {
   const files = import.meta.glob<string>(
-    ['/src/content/blog/**/*.{md,mdx}', '/content/blog/**/*.{md,mdx}'],
+    '/content/blog/**/*.{md,mdx}',
     { query: '?raw', eager: true, import: 'default' }
   );
 
@@ -203,7 +165,7 @@ export function loadBlogPostsFromMarkdown(): BlogPost[] {
 
 export function loadCheatsheetsFromMarkdown(): Cheatsheet[] {
   const files = import.meta.glob<string>(
-    ['/src/content/cheatsheets/**/*.{md,mdx}', '/content/cheatsheets/**/*.{md,mdx}'],
+    '/content/cheatsheets/**/*.{md,mdx}',
     { query: '?raw', eager: true, import: 'default' }
   );
 

@@ -9,7 +9,10 @@ interface CheatsheetCardProps {
 }
 
 export const CheatsheetCard: React.FC<CheatsheetCardProps> = ({ cheatsheet }) => {
-  const totalCommands = cheatsheet.sections.reduce((acc, sec) => acc + sec.items.length, 0);
+  const totalCommands = (cheatsheet.sections || []).reduce((acc, sec) => {
+    const items = Array.isArray(sec?.items) ? sec.items : [];
+    return acc + items.length;
+  }, 0);
 
   return (
     <article className="group relative flex flex-col justify-between rounded-xl glass-panel p-5 border border-border hover:border-amber-500/40 transition-all duration-300">
