@@ -230,6 +230,7 @@ export function loadCheatsheetsFromMarkdown(): Cheatsheet[] {
       tags: Array.isArray(metadata.tags) ? metadata.tags : [],
       lastUpdated: String(metadata.lastUpdated || new Date().toISOString().split('T')[0]),
       sections,
+      content,
     };
   });
 }

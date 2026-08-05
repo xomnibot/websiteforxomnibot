@@ -7,6 +7,7 @@ import { CopyButton } from '@/components/buttons/CopyButton';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { contentService } from '@/services/contentService';
 import { FileText, Printer, ArrowLeft, Terminal } from 'lucide-react';
+import { marked } from 'marked';
 
 export const CheatsheetDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -70,7 +71,7 @@ export const CheatsheetDetailPage: React.FC = () => {
 
         {/* Sections & Commands */}
         <div className="space-y-8">
-          {cheatsheet.sections.map((section, sIdx) => (
+          {cheatsheet.sections && cheatsheet.sections.length > 0 && cheatsheet.sections.map((section, sIdx) => (
             <div key={sIdx} className="space-y-3">
               <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-amber-400" />
@@ -104,6 +105,14 @@ export const CheatsheetDetailPage: React.FC = () => {
               </div>
             </div>
           ))}
+
+          {/* Markdown Content Body */}
+          {cheatsheet.content && (
+            <div
+              className="prose dark:prose-invert max-w-none text-sm leading-relaxed space-y-6 pt-4 text-muted-foreground border-t border-border"
+              dangerouslySetInnerHTML={{ __html: marked.parse(cheatsheet.content) }}
+            />
+          )}
         </div>
 
         <div className="print:hidden pt-8 border-t border-border">

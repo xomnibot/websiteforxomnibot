@@ -1,64 +1,157 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PrimaryButton } from '@/components/buttons/PrimaryButton';
 import { GhostButton } from '@/components/buttons/GhostButton';
 import { GithubIcon } from '@/components/common/SocialIcons';
 import { siteConfig } from '@/data/siteConfig';
-import { ShieldAlert, BookOpen, Code2, FileText, Send, ArrowRight, Sparkles, Terminal, Cpu, Coffee, Zap, Shield } from 'lucide-react';
+import {
+  ShieldAlert,
+  BookOpen,
+  Code2,
+  FileText,
+  Send,
+  ArrowRight,
+  Terminal,
+  Cpu,
+  Coffee,
+  Zap,
+  Shield,
+  Radio,
+  Sparkles,
+} from 'lucide-react';
 
 export const HomePage: React.FC = () => {
   return (
-    <PageContainer className="space-y-20 py-8">
-      {/* Apple-style Centered Persona Hero */}
-      <section className="relative text-center max-w-4xl mx-auto space-y-6 pt-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-mono font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Hey! I&apos;m xomnibot 👋</span>
+    <PageContainer className="space-y-24 py-8">
+      {/* High-Tech Cyber Hero Screen */}
+      <section className="relative pt-6 pb-4">
+        {/* Ambient Glowing Background Accent Orbs */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center -z-10 overflow-hidden">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.3, 0.15] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-[500px] h-[500px] bg-emerald-500/20 blur-[120px] rounded-full"
+          />
+          <motion.div
+            animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.25, 0.1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-[400px] h-[400px] bg-cyan-500/20 blur-[100px] rounded-full"
+          />
         </div>
 
-        <h1 className="font-heading font-extrabold text-4xl sm:text-6xl text-foreground tracking-tight leading-[1.08]">
-          Security Researcher. <br />
-          <span className="text-emerald-400">Builder. Curious Whiz.</span>
-        </h1>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center max-w-6xl mx-auto">
+          {/* Left Column: Hero Text & Call-To-Action */}
+          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-mono font-semibold">
+              <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-400" />
+              <span>xomnibot :: RESEARCH_LAB_ONLINE</span>
+            </div>
 
-        <p className="text-base sm:text-lg text-muted-foreground font-sans leading-relaxed max-w-2xl mx-auto">
-          I love taking complex systems apart just to see how they work. From breaking CTF challenges for fun to auditing kernel drivers, dissecting browser bugs, and writing open-source security tools — I share everything I learn along the way.
-        </p>
+            <h1 className="font-heading font-extrabold text-4xl sm:text-6xl text-foreground tracking-tight leading-[1.08]">
+              Cybersecurity Whiz. <br />
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                Builder & Vulnerabilities Researcher.
+              </span>
+            </h1>
 
-        {/* Quick Personal Stat Pill Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-3 font-mono text-xs text-muted-foreground pt-1">
-          <span className="px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center gap-1.5 whitespace-nowrap">
-            <Cpu className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> OS: {siteConfig.persona.favoriteOS}
-          </span>
-          <span className="px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center gap-1.5 whitespace-nowrap">
-            <Code2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> Code: Python • Rust • C++
-          </span>
-          <span className="px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center gap-1.5 whitespace-nowrap">
-            <Coffee className="w-3.5 h-3.5 text-amber-400 shrink-0" /> Fuel: Cold Brew & Dark Mode
-          </span>
-        </div>
+            <p className="text-base sm:text-lg text-muted-foreground font-sans leading-relaxed max-w-xl mx-auto lg:mx-0">
+              Passionate about dissecting complex systems, cracking CTF puzzles, analyzing CVE zero-days, and crafting open-source security tooling.
+            </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
-          <Link to="/writeups">
-            <PrimaryButton size="lg" icon={<ShieldAlert className="w-4.5 h-4.5" />}>
-              Explore CTF Writeups
-            </PrimaryButton>
-          </Link>
-          <Link to="/research">
-            <PrimaryButton size="lg" variant="outline" icon={<BookOpen className="w-4.5 h-4.5" />}>
-              Read CVE Papers
-            </PrimaryButton>
-          </Link>
-          <a href={siteConfig.socialLinks.github} target="_blank" rel="noreferrer">
-            <GhostButton icon={<GithubIcon className="w-4.5 h-4.5" />}>
-              GitHub Repositories
-            </GhostButton>
-          </a>
+            {/* Quick Badges */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 font-mono text-xs text-muted-foreground pt-1">
+              <span className="px-3 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800 flex items-center gap-1.5 whitespace-nowrap">
+                <Cpu className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> OS: {siteConfig.persona.favoriteOS}
+              </span>
+              <span className="px-3 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800 flex items-center gap-1.5 whitespace-nowrap">
+                <Code2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> Code: Python • Rust • C++
+              </span>
+              <span className="px-3 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800 flex items-center gap-1.5 whitespace-nowrap">
+                <Coffee className="w-3.5 h-3.5 text-amber-400 shrink-0" /> Fuel: Cold Brew & Dark Mode
+              </span>
+            </div>
+
+            {/* Action CTA Buttons */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+              <Link to="/writeups">
+                <PrimaryButton size="lg" icon={<ShieldAlert className="w-4.5 h-4.5" />}>
+                  Explore Writeups
+                </PrimaryButton>
+              </Link>
+              <Link to="/research">
+                <PrimaryButton size="lg" variant="outline" icon={<BookOpen className="w-4.5 h-4.5" />}>
+                  Read Research
+                </PrimaryButton>
+              </Link>
+              <a href={siteConfig.socialLinks.github} target="_blank" rel="noreferrer">
+                <GhostButton icon={<GithubIcon className="w-4.5 h-4.5" />}>
+                  GitHub
+                </GhostButton>
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column: Live Simulated Cyber Screen / HUD Terminal */}
+          <div className="lg:col-span-5">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="rounded-2xl glass-panel border border-emerald-500/30 p-5 shadow-2xl backdrop-blur-xl bg-black/80 space-y-4 text-left font-mono text-xs"
+            >
+              {/* Terminal Window Top Bar */}
+              <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-rose-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                  <span className="text-[11px] font-bold text-emerald-400 ml-1">xomnibot-hud.sh</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-cyan-400 animate-spin" /> LIVE
+                </span>
+              </div>
+
+              {/* Console Screen Output */}
+              <div className="space-y-2 text-emerald-400/90 leading-relaxed">
+                <div className="text-zinc-500"># System diagnostic initializing...</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">&gt;</span>
+                  <span>SYSTEM_STATUS: <span className="text-emerald-400 font-bold">ONLINE</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">&gt;</span>
+                  <span>ACTIVE_RESEARCH: <span className="text-cyan-300 font-semibold">{siteConfig.currentFocus.currentResearch}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">&gt;</span>
+                  <span>ACTIVE_TOOL: <span className="text-amber-300 font-semibold">{siteConfig.currentFocus.activeTool}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">&gt;</span>
+                  <span>TARGET_OS: <span className="text-zinc-300">Arch Linux (Hyprland)</span></span>
+                </div>
+              </div>
+
+              {/* Live Stats Pill Row */}
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-emerald-500/20 text-center">
+                <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <div className="text-base font-extrabold text-emerald-400 font-sans">50+</div>
+                  <div className="text-[10px] text-muted-foreground uppercase">CTF Solved</div>
+                </div>
+                <div className="p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                  <div className="text-base font-extrabold text-cyan-400 font-sans">10+</div>
+                  <div className="text-[10px] text-muted-foreground uppercase">CVE Papers</div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Apple Bento Grid — Persona Showcase & Cool Details */}
+      {/* Bento Grid — Persona Showcase */}
       <section className="space-y-6">
         <div className="text-center space-y-1.5 max-w-xl mx-auto">
           <span className="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">Inside the Lab</span>
@@ -66,7 +159,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Bento Card 1: My Rig & Environment */}
+          {/* Bento Card 1: My Rig */}
           <div className="p-6 rounded-2xl glass-panel border border-border space-y-4 hover:border-emerald-500/40 transition-all">
             <div className="flex items-center justify-between">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -93,7 +186,7 @@ export const HomePage: React.FC = () => {
             </ul>
           </div>
 
-          {/* Bento Card 2: Cool Fun Facts */}
+          {/* Bento Card 2: Fun Facts */}
           <div className="p-6 rounded-2xl glass-panel border border-border space-y-4 hover:border-cyan-500/40 transition-all">
             <div className="flex items-center justify-between">
               <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
@@ -114,7 +207,7 @@ export const HomePage: React.FC = () => {
             </ul>
           </div>
 
-          {/* Bento Card 3: Favorite Security Arsenal */}
+          {/* Bento Card 3: Security Arsenal */}
           <div className="p-6 rounded-2xl glass-panel border border-border space-y-4 hover:border-purple-500/40 transition-all">
             <div className="flex items-center justify-between">
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
@@ -132,14 +225,11 @@ export const HomePage: React.FC = () => {
                 </span>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground pt-1">
-              Plus custom open-source scripts written to automate binary analysis and Active Directory roasting.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* 4 Category Portal Launchpads */}
+      {/* 4 Category Launchpads */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <Link
           to="/writeups"
@@ -214,38 +304,42 @@ export const HomePage: React.FC = () => {
         </Link>
       </section>
 
-      {/* Minimal Apple-style Connect Banner */}
-      <section className="p-8 sm:p-10 rounded-3xl glass-panel border border-emerald-500/20 text-center space-y-4 max-w-2xl mx-auto">
-        <div className="space-y-2">
-          <span className="px-3.5 py-1 text-xs font-mono text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/30 uppercase font-semibold">
-            Let&apos;s Stay Connected 🚀
-          </span>
-          <h2 className="text-2xl font-bold font-heading text-foreground">
-            Get Fresh Technical Drops & Research Papers
-          </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            No corporate fluff, no spam — just pure code, tools, and research notes whenever I drop something new.
-          </p>
-        </div>
+      {/* Connect Banner — Pushed lower down */}
+      <section className="pt-12 mt-16">
+        <div className="p-8 sm:p-10 rounded-3xl glass-panel border border-emerald-500/20 text-center space-y-4 max-w-2xl mx-auto shadow-xl">
+          <div className="space-y-2">
+            <span className="px-3.5 py-1 text-xs font-mono text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/30 uppercase font-semibold">
+              Let&apos;s Stay Connected 🚀
+            </span>
+            <h2 className="text-2xl font-bold font-heading text-foreground">
+              Get Fresh Technical Drops & Research Papers
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              No corporate fluff, no spam — just pure code, tools, and research notes whenever I drop something new.
+            </p>
+          </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            alert('Welcome aboard! Thanks for joining!');
-          }}
-          className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-2"
-        >
-          <input
-            type="email"
-            required
-            placeholder="your.email@domain.com"
-            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground text-xs font-mono focus:outline-none focus:border-emerald-400"
-          />
-          <PrimaryButton type="submit" size="sm" icon={<Send className="w-3.5 h-3.5" />}>
-            Subscribe
-          </PrimaryButton>
-        </form>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              alert('Welcome aboard! Thanks for joining!');
+            }}
+            className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-2"
+          >
+            <input
+              type="email"
+              required
+              placeholder="your.email@domain.com"
+              className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground text-xs font-mono focus:outline-none focus:border-emerald-400"
+            />
+            <PrimaryButton type="submit" size="sm" icon={<Send className="w-3.5 h-3.5" />}>
+              Subscribe
+            </PrimaryButton>
+          </form>
+        </div>
       </section>
     </PageContainer>
   );
 };
+
+export default HomePage;

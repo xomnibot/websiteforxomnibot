@@ -19,7 +19,7 @@ export const ResearchCard: React.FC<ResearchCardProps> = ({ paper }) => {
               {paper.category}
             </Tag>
             {paper.cve && (
-              <span className="font-mono text-xs font-bold text-black bg-cyan-400 px-2 py-0.5 rounded">
+              <span className="font-mono text-xs font-bold text-black bg-cyan-400 px-2 py-0.5 rounded whitespace-nowrap">
                 {paper.cve}
               </span>
             )}

@@ -94,6 +94,7 @@ export interface Cheatsheet {
   tags: string[];
   lastUpdated: string;
   sections: CheatsheetCategory[];
+  content?: string;
 }
 
 export interface YouTubeVideo {
