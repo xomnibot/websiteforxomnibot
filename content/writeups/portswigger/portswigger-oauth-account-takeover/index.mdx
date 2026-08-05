@@ -1,0 +1,45 @@
+---
+title: PortSwigger OAuth 2.0 Account Takeover
+slug: portswigger-oauth-account-takeover
+date: '2026-08-01'
+type: writeup
+platform: PortSwigger
+difficulty: Hard
+category: Web Security
+tags:
+  - OAuth 2.0
+  - JWT
+  - Account Takeover
+summary: Exploiting unvalidated redirect URIs and implicit grant token leaks to achieve pre-auth account takeover.
+readingTime: 8 min read
+featured: true
+draft: false
+objectives:
+  - Bypass redirect URI regex filters using path traversal.
+  - Exfiltrate implicit grant fragment tokens.
+  - Implement strict URL whitelist policies.
+prerequisites:
+  - OAuth 2.0 Implicit Grant Flow
+  - Burp Suite Repeater
+tools:
+  - Burp Suite Pro
+  - OAuth Flaw Finder
+  - Python Exploit Server
+---
+
+## Overview
+
+OAuth 2.0 implementations frequently fail at enforcing strict redirect URI validation. When an identity provider (IdP) relies on regex matching for `redirect_uri`, access tokens can be leaked to external origins.
+
+### Key Exploitation Steps
+
+1. **Path Traversal Probing**:
+   Submitting `redirect_uri=https://client.xomnibot.in/callback/../open-redirect` allowed bypassing domain whitelists.
+
+2. **Token Harvesting**:
+   URL fragments (`#access_token=...`) were preserved across HTTP 302 redirects to our attacker server log.
+
+### Mitigation Guidance
+
+- Enforce exact string matching for registered `redirect_uri` endpoints.
+- Enforce PKCE (Proof Key for Code Exchange) across all clients.

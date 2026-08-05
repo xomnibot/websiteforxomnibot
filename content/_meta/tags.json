@@ -1,0 +1,20 @@
+{
+  "OAuth 2.0": {
+    "color": "emerald"
+  },
+  "JWT": {
+    "color": "cyan"
+  },
+  "Kerberos": {
+    "color": "amber"
+  },
+  "BloodHound": {
+    "color": "rose"
+  },
+  "Rust": {
+    "color": "orange"
+  },
+  "Web Security": {
+    "color": "blue"
+  }
+}

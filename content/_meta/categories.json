@@ -1,0 +1,50 @@
+{
+  "writeup": [
+    "Web Security",
+    "Active Directory",
+    "Reverse Engineering",
+    "Cryptography",
+    "Cloud Security",
+    "Binary Exploitation",
+    "Forensics"
+  ],
+  "research": [
+    "CVE Analysis",
+    "Vulnerability Research",
+    "Exploit Internals",
+    "Patch Diffing",
+    "Malware Analysis",
+    "Browser Security",
+    "AI Security"
+  ],
+  "blog": [
+    "Career",
+    "Study Methods",
+    "Productivity",
+    "Tool Reviews",
+    "Opinions",
+    "Conferences",
+    "Event Recaps"
+  ],
+  "cheatsheet": [
+    "Linux",
+    "Bash",
+    "PowerShell",
+    "Python",
+    "Nmap",
+    "Burp Suite",
+    "SQLMap",
+    "Metasploit",
+    "Active Directory",
+    "Docker",
+    "Git"
+  ],
+  "project": [
+    "AI Tools",
+    "Security Tools",
+    "CLI Tools",
+    "Browser Extensions",
+    "Automation",
+    "Research Projects"
+  ]
+}
