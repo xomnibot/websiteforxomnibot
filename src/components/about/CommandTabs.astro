@@ -1,0 +1,161 @@
+---
+/** Sticky terminal-style tab strip. The tab for the section in view is active; clicking scrolls to it. */
+import Container from '@/components/ui/Container.astro';
+
+export interface AboutTab {
+  id: string;
+  label: string;
+}
+interface Props {
+  tabs: AboutTab[];
+}
+const { tabs } = Astro.props;
+---
+
+<div data-about-tabs class="sticky top-16 z-30 border-b border-line bg-bg/85 backdrop-blur-md supports-[backdrop-filter]:bg-bg/70">
+  <Container>
+    <nav aria-label="About sections">
+      <div data-tabs-scroller class="tabs-scroller flex overflow-x-auto overscroll-x-contain">
+        <ul class="flex min-w-max items-end gap-1 px-0.5">
+          {
+            tabs.map((t, i) => (
+              <li>
+                <a
+                  href={`#${t.id}`}
+                  data-tab={t.id}
+                  aria-current={i === 0 ? 'true' : undefined}
+                  class="tab group relative flex h-11 items-center gap-1.5 whitespace-nowrap px-3.5 font-mono text-[0.8125rem] text-subtle transition-colors hover:text-fg"
+                >
+                  <span aria-hidden="true" class="tab-prompt text-subtle transition-colors">$</span>
+                  {t.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </nav>
+  </Container>
+</div>
+
+<style>
+  .tabs-scroller {
+    scrollbar-width: none;
+  }
+  .tabs-scroller::-webkit-scrollbar {
+    display: none;
+  }
+  [data-about-tabs][data-fade-r='true'] .tabs-scroller {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+  }
+  [data-about-tabs][data-fade-l='true'] .tabs-scroller {
+    -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+  }
+  [data-about-tabs][data-fade-l='true'][data-fade-r='true'] .tabs-scroller {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+  }
+  .tab::after {
+    content: '';
+    position: absolute;
+    left: 0.875rem;
+    right: 0.875rem;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .tab[aria-current='true'] {
+    color: var(--fg);
+  }
+  .tab[aria-current='true'] .tab-prompt {
+    color: var(--accent);
+  }
+  .tab[aria-current='true']::after {
+    transform: scaleX(1);
+  }
+</style>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function init() {
+    cleanup?.();
+    cleanup = null;
+    const bar = document.querySelector<HTMLElement>('[data-about-tabs]');
+    const scroller = bar?.querySelector<HTMLElement>('[data-tabs-scroller]');
+    if (!bar || !scroller) return;
+    const links = Array.from(bar.querySelectorAll<HTMLAnchorElement>('a[data-tab]'));
+    const sections = links.map((a) => document.getElementById(a.dataset.tab!)).filter((s): s is HTMLElement => !!s);
+    if (!sections.length) return;
+
+    let current = '';
+    let lockUntil = 0;
+
+    const fades = () => {
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      bar.dataset.fadeL = String(max > 2 && scroller.scrollLeft > 4);
+      bar.dataset.fadeR = String(max > 2 && scroller.scrollLeft < max - 4);
+    };
+
+    const setActive = (id: string) => {
+      if (id === current) return;
+      current = id;
+      links.forEach((a) => {
+        const on = a.dataset.tab === id;
+        if (on) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+        if (on && scroller.scrollWidth > scroller.clientWidth) {
+          const left = a.offsetLeft - (scroller.clientWidth - a.offsetWidth) / 2;
+          scroller.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+        }
+      });
+      sections.forEach((s) => s.classList.toggle('is-active', s.id === id));
+    };
+
+    const measure = () => {
+      if (performance.now() < lockUntil) return;
+      const line = 64 + bar.offsetHeight + 24;
+      let id = sections[0].id;
+      for (const s of sections) if (s.getBoundingClientRect().top <= line) id = s.id;
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      if (atBottom) id = sections[sections.length - 1].id;
+      setActive(id);
+    };
+    const onScroll = () => measure();
+    const onClick = (e: Event) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-tab]');
+      if (!a) return;
+      lockUntil = performance.now() + 900;
+      setActive(a.dataset.tab!);
+      window.setTimeout(onScroll, 950);
+    };
+
+    bar.addEventListener('click', onClick);
+    scroller.addEventListener('scroll', fades, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', fades);
+    fades();
+    measure();
+
+    cleanup = () => {
+      bar.removeEventListener('click', onClick);
+      scroller.removeEventListener('scroll', fades);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('resize', fades);
+    };
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    cleanup?.();
+    cleanup = null;
+  });
+</script>

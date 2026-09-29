@@ -1,0 +1,117 @@
+---
+/** The rig as a syntax-coloured dotfile card (hand-built, not an Expressive Code block). */
+import { siteConfig } from '@/lib/site';
+import { Copy, Check } from '@lucide/astro';
+
+const { rig, primaryLanguages, favoriteSecurityTools } = siteConfig.persona;
+
+type Tok = { t: string; c: 'key' | 'str' | 'com' | 'pun' | 'sec' | 'plain' };
+const str = (k: string, v: string): Tok[] => [
+  { t: k, c: 'key' },
+  { t: ' = ', c: 'pun' },
+  { t: `"${v}"`, c: 'str' },
+];
+const arr = (k: string, v: readonly string[]): Tok[] => {
+  const out: Tok[] = [{ t: k, c: 'key' }, { t: ' = [', c: 'pun' }];
+  v.forEach((x, i) => {
+    out.push({ t: `"${x}"`, c: 'str' });
+    if (i < v.length - 1) out.push({ t: ', ', c: 'pun' });
+  });
+  out.push({ t: ']', c: 'pun' });
+  return out;
+};
+const lines: Tok[][] = [
+  [{ t: `# ~/.config/rig.toml, ${siteConfig.persona.handle}@lab`, c: 'com' }],
+  [{ t: '[machine]', c: 'sec' }],
+  str('os', rig.os),
+  str('terminal', rig.terminal),
+  str('editor', rig.editor),
+  str('hardware', rig.hardware),
+  [],
+  [{ t: '[toolbox]', c: 'sec' }],
+  arr('languages', primaryLanguages),
+  arr('tools', favoriteSecurityTools),
+];
+const plain = lines.map((l) => l.map((x) => x.t).join('')).join('\n');
+const tone = {
+  key: 'text-accent-2',
+  str: 'text-accent',
+  com: 'text-subtle italic',
+  pun: 'text-subtle',
+  sec: 'text-amber font-semibold',
+  plain: 'text-fg',
+} as const;
+---
+
+<div data-reveal class="overflow-hidden rounded-xl border border-line bg-elevated shadow-sm">
+  <div class="flex items-center gap-2 border-b border-line bg-surface px-4 py-2.5">
+    <span aria-hidden="true" class="size-2.5 rounded-full bg-line-strong"></span>
+    <span aria-hidden="true" class="size-2.5 rounded-full bg-line-strong"></span>
+    <span aria-hidden="true" class="size-2.5 rounded-full bg-line-strong"></span>
+    <span class="ml-2 truncate font-mono text-xs text-subtle">~/.config/rig.toml</span>
+    <button
+      type="button"
+      data-rig-copy
+      data-text={plain}
+      class="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-line px-2.5 font-mono text-xs text-muted transition-colors hover:border-accent/50 hover:text-fg"
+      aria-label="Copy rig config"
+    >
+      <Copy class="size-3.5" data-icon-copy /><Check class="hidden size-3.5 text-accent" data-icon-done /><span data-copy-label>copy</span>
+    </button>
+  </div>
+  <div class="overflow-x-auto">
+    <pre class="rig-code m-0 min-w-max py-4 font-mono text-[0.8125rem] leading-7 sm:text-sm" tabindex="0"><code>{
+      lines.map((l, i) => (
+        <span class="rig-line flex">
+          <span aria-hidden="true" class="w-10 shrink-0 select-none pr-4 text-right text-subtle/70">{i + 1}</span>
+          <span class="pr-6">{l.length === 0 ? ' ' : l.map((x) => <span class={tone[x.c]}>{x.t}</span>)}</span>
+        </span>
+      ))
+    }</code></pre>
+  </div>
+</div>
+
+<style>
+  .rig-line:hover {
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+</style>
+
+<script>
+  let cleanup: (() => void) | null = null;
+  function init() {
+    cleanup?.();
+    cleanup = null;
+    const btn = document.querySelector<HTMLButtonElement>('[data-rig-copy]');
+    if (!btn) return;
+    let timer = 0;
+    const onClick = async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.text ?? '');
+      } catch {
+        return;
+      }
+      btn.querySelector('[data-icon-copy]')?.classList.add('hidden');
+      btn.querySelector('[data-icon-done]')?.classList.remove('hidden');
+      const label = btn.querySelector('[data-copy-label]');
+      if (label) label.textContent = 'copied';
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        btn.querySelector('[data-icon-copy]')?.classList.remove('hidden');
+        btn.querySelector('[data-icon-done]')?.classList.add('hidden');
+        if (label) label.textContent = 'copy';
+      }, 1600);
+    };
+    btn.addEventListener('click', onClick);
+    cleanup = () => {
+      btn.removeEventListener('click', onClick);
+      window.clearTimeout(timer);
+    };
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    cleanup?.();
+    cleanup = null;
+  });
+</script>

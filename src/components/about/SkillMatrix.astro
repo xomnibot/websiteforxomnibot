@@ -1,0 +1,80 @@
+---
+/** ATT&CK-style matrix: each capability area is a column, each point a cell. Plus compact skill chip rows. */
+import { capabilities } from '@/data/about';
+import { siteConfig } from '@/lib/site';
+
+const groups = [
+  { label: 'Offensive', skills: siteConfig.skills.offensive },
+  { label: 'Defensive', skills: siteConfig.skills.defensive },
+  { label: 'Development', skills: siteConfig.skills.development },
+  { label: 'AI Security', skills: siteConfig.skills.aiSecurity },
+];
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<div data-reveal>
+  <p class="mb-2 font-mono text-xs text-subtle lg:hidden">
+    <span aria-hidden="true">←</span> scroll the matrix <span aria-hidden="true">→</span>
+  </p>
+  <div class="matrix-scroll overflow-x-auto rounded-xl border border-line bg-elevated" tabindex="0" role="region" aria-label="Capability matrix">
+    <div class="matrix grid min-w-[62rem] grid-cols-6 lg:min-w-0">
+      {
+        capabilities.map((cap, ci) => (
+          <div class="mcol flex flex-col border-r border-line last:border-r-0">
+            <div class="mhead min-h-[5.5rem] border-b border-line-strong bg-surface px-3 py-3">
+              <p class="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-subtle">
+                TA{pad(ci + 1)} · {cap.points.length} techniques
+              </p>
+              <h3 class="mt-1.5 text-[0.8125rem] font-semibold leading-snug tracking-[-0.01em] text-fg">{cap.area}</h3>
+            </div>
+            <ul class="flex flex-1 flex-col gap-1.5 p-1.5">
+              {
+                cap.points.map((pt, pi) => (
+                  <li class="mcell flex-1 rounded-md border border-line bg-bg px-2.5 py-2 text-[0.75rem] leading-[1.45] text-muted">
+                    <span class="mb-1 block font-mono text-[0.625rem] text-subtle">T{pad(ci + 1)}.{pad(pi + 1)}</span>
+                    {pt}
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <dl class="mt-8 grid gap-x-8 gap-y-5 md:grid-cols-2">
+    {
+      groups.map((g) => (
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-4">
+          <dt class="eyebrow w-24 shrink-0 !text-[0.6875rem] text-subtle">{g.label}</dt>
+          <dd class="flex flex-wrap gap-1.5">
+            {g.skills.map((s) => (
+              <span class="rounded-md border border-line bg-elevated px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/50 hover:text-fg">{s}</span>
+            ))}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<style>
+  .mcol {
+    transition: background-color 180ms ease;
+  }
+  .mcol:hover {
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+  .mcol:hover .mhead {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    box-shadow: inset 0 2px 0 0 var(--accent);
+  }
+  .mcol:hover .mcell {
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+    color: var(--fg);
+  }
+  .matrix-scroll {
+    scrollbar-width: thin;
+  }
+</style>

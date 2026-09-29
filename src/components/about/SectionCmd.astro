@@ -1,0 +1,56 @@
+---
+/** `$ command` intro line that opens each About section. The caret blinks while the section is active. */
+interface Props {
+  cmd: string;
+  class?: string;
+  typed?: boolean;
+}
+const { cmd, class: className, typed = false } = Astro.props;
+---
+
+<p class:list={['about-cmd font-mono text-[0.8125rem] leading-5 text-muted', className]}>
+  <span aria-hidden="true" class="mr-2 text-accent">$</span><span class:list={['text-fg', typed && 'about-typed']} style={typed ? `--n:${cmd.length}` : undefined}>{cmd}</span><span aria-hidden="true" class="about-caret"></span>
+</p>
+
+<style>
+  .about-caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.3em;
+    vertical-align: -0.18em;
+    background: var(--accent);
+    opacity: 0;
+  }
+  :global(.is-active) .about-caret {
+    opacity: 1;
+  }
+  /* Blink only the active section's caret; an animation on every caret would override opacity: 0. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.is-active) .about-caret {
+      animation: about-blink 1.1s steps(1) infinite;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .about-typed {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      vertical-align: bottom;
+      animation: about-type 550ms steps(var(--n)) 250ms both;
+    }
+  }
+  @keyframes about-type {
+    from {
+      width: 0;
+    }
+    to {
+      width: calc(var(--n) * 1ch);
+    }
+  }
+  @keyframes about-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>

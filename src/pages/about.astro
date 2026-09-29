@@ -3,221 +3,313 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/ui/Container.astro';
 import SectionHeading from '@/components/ui/SectionHeading.astro';
 import Button from '@/components/ui/Button.astro';
-import BrandIcon from '@/components/ui/BrandIcon.astro';
-import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
-import SkillGroup from '@/components/about/SkillGroup.astro';
-import Timeline from '@/components/about/Timeline.astro';
-import { siteConfig } from '@/lib/site';
-import { timeline } from '@/data/timeline';
-import { bio, featuredProjects, capabilities, learningPath } from '@/data/about';
 import Badge from '@/components/ui/Badge.astro';
 import type { BadgeTone } from '@/components/ui/Badge.astro';
-import { Swords, ShieldHalf, Code, BrainCircuit, Sparkles, Monitor, SquareTerminal, Cpu, PenTool, Check, ArrowUpRight, CircleCheck, CircleDot, Circle } from '@lucide/astro';
+import BrandIcon from '@/components/ui/BrandIcon.astro';
+import Reveal from '@/components/home/Reveal.astro';
+import CommandTabs from '@/components/about/CommandTabs.astro';
+import SectionCmd from '@/components/about/SectionCmd.astro';
+import IdCard from '@/components/about/IdCard.astro';
+import SkillMatrix from '@/components/about/SkillMatrix.astro';
+import QuestLog from '@/components/about/QuestLog.astro';
+import GitLog from '@/components/about/GitLog.astro';
+import RigConfig from '@/components/about/RigConfig.astro';
+import { siteConfig } from '@/lib/site';
+import { bio, featuredProjects } from '@/data/about';
+import { Check, ArrowUpRight, Mail, ArrowRight } from '@lucide/astro';
 
-const projectStatusTone: Record<string, BadgeTone> = { Active: 'green', Stable: 'blue', Archived: 'neutral' };
-const aboutSocials = [
+const tabs = [
+  { id: 'whoami', label: 'whoami' },
+  { id: 'bio', label: 'cat bio' },
+  { id: 'projects', label: 'ls projects' },
+  { id: 'skills', label: 'skills --matrix' },
+  { id: 'learning', label: 'learning --log' },
+  { id: 'log', label: 'git log' },
+  { id: 'rig', label: 'cat ~/.rig' },
+  { id: 'contact', label: './contact' },
+];
+
+const statusTone: Record<string, BadgeTone> = { Active: 'green', Stable: 'blue', Archived: 'neutral' };
+const socials = [
   { href: siteConfig.socials.github, label: 'GitHub', brand: 'github' as const },
   { href: siteConfig.socials.linkedin, label: 'LinkedIn', brand: 'linkedin' as const },
   { href: siteConfig.socials.youtube, label: 'YouTube', brand: 'youtube' as const },
   { href: siteConfig.socials.instagram, label: 'Instagram', brand: 'instagram' as const },
 ];
-const learningIcon = { Completed: CircleCheck, 'In progress': CircleDot, Next: Circle } as const;
 
-const skillGroups = [
-  { key: 'offensive', label: 'Offensive Security', icon: Swords, skills: siteConfig.skills.offensive },
-  { key: 'defensive', label: 'Defensive Security', icon: ShieldHalf, skills: siteConfig.skills.defensive },
-  { key: 'development', label: 'Development', icon: Code, skills: siteConfig.skills.development },
-  { key: 'aiSecurity', label: 'AI Security', icon: BrainCircuit, skills: siteConfig.skills.aiSecurity },
-];
+// One-sentence hook: the first sentence of bio[0].
+const hook = bio[0].split(/(?<=\.)\s/)[0];
 
-const rig = [
-  { label: 'OS', value: siteConfig.persona.rig.os, icon: Monitor },
-  { label: 'Terminal', value: siteConfig.persona.rig.terminal, icon: SquareTerminal },
-  { label: 'Editor', value: siteConfig.persona.rig.editor, icon: PenTool },
-  { label: 'Hardware', value: siteConfig.persona.rig.hardware, icon: Cpu },
-];
+// Highlight the loop sentence inside bio[1] without changing any wording.
+const loop = 'find the bug, understand the root cause, write the exploit, then build the detection or the fix';
+const at = bio[1].indexOf(loop);
+const bio2 = at >= 0 ? [bio[1].slice(0, at), loop, bio[1].slice(at + loop.length)] : null;
+
+const dirLine = `drwxr-xr-x  ${siteConfig.persona.handle}  ${featuredProjects.length} projects`;
+const sec = 'about-section relative scroll-mt-14 border-t border-line py-20 sm:py-24';
 ---
 
 <BaseLayout
   title="About"
-  description={`${siteConfig.persona.role} — mission, skills, setup, and background for ${siteConfig.name}.`}
+  description={`${siteConfig.persona.role}: story, projects, skills, learning log and setup behind ${siteConfig.name}.`}
 >
-  <Container class="pt-14 pb-16 sm:pt-20">
-    <TerminalPrompt path="~/about" />
-    <h1 class="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-fg sm:text-5xl">
-      Hi, I'm {siteConfig.persona.handle} — {siteConfig.persona.role}.
-    </h1>
-    {bio.map((para, i) => (
-      <p class:list={['max-w-2xl text-muted', i === 0 ? 'mt-5 text-lg' : 'mt-3']}>{para}</p>
-    ))}
+  <Reveal />
+  <CommandTabs tabs={tabs} />
 
-    <div class="mt-8 flex flex-wrap items-center gap-3">
-      <Button href="/contact" variant="primary">Get in touch</Button>
-      <Button href="/writeups" variant="secondary">Read the writeups</Button>
+  <!-- 1. whoami -->
+  <section id="whoami" class="about-section is-active relative scroll-mt-14 overflow-x-clip pb-20 pt-10 sm:pb-24 sm:pt-14 lg:pt-16">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+      <div class="bg-glow absolute inset-0"></div>
+      <div class="bg-grid absolute inset-0"></div>
     </div>
-  </Container>
+    <Container class="grid items-center gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-10">
+      <div>
+        <SectionCmd cmd="whoami" typed />
+        <div class="hero-out">
+          <h1 class="mt-5 text-display font-semibold text-fg">
+            <span class="bg-gradient-to-r from-accent to-accent-2 bg-clip-text text-transparent">{siteConfig.persona.handle}</span>
+          </h1>
+          <p class="mt-3 font-mono text-sm text-accent-2 sm:text-base">{siteConfig.persona.role}</p>
+          <p class="mt-6 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">{hook}</p>
 
-  <!-- Featured projects -->
-  <Container class="pb-16 sm:pb-24">
-    <SectionHeading eyebrow="// projects" title="Things I've built" class="mb-8" />
-    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {featuredProjects.map((p) => {
-        const Tag = p.link ? 'a' : 'div';
-        return (
-          <Tag
-            href={p.link}
-            class:list={[
-              'group flex flex-col rounded-xl border border-line bg-elevated p-5 sm:p-6',
-              p.link && 'transition-colors hover:border-accent/40',
-            ]}
-          >
-            <div class="flex items-start justify-between gap-3">
-              <h3 class="font-semibold tracking-tight text-fg group-hover:text-accent">
-                {p.name}
-                {p.link && <ArrowUpRight class="ml-1 inline size-3.5 text-subtle group-hover:text-accent" />}
-              </h3>
-              <Badge tone={projectStatusTone[p.status]}>{p.status}</Badge>
-            </div>
-            <p class="mt-2 text-sm text-muted">{p.summary}</p>
-            <ul class="mt-4 space-y-2">
-              {p.highlights.map((h) => (
-                <li class="flex items-start gap-2 text-sm text-muted">
-                  <Check class="mt-0.5 size-3.5 shrink-0 text-accent" />
-                  <span>{h}</span>
+          <div class="mt-9 flex flex-wrap items-center gap-3">
+            <Button href="/contact" variant="primary" size="lg">Get in touch <ArrowRight class="size-4" /></Button>
+            <Button href="/writeups" variant="secondary" size="lg">Read the writeups</Button>
+          </div>
+
+          <ul class="mt-8 flex flex-wrap items-center gap-2" aria-label="Find me online">
+            {
+              socials.map((s) => (
+                <li>
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    class="flex size-10 items-center justify-center rounded-lg border border-line bg-elevated text-muted transition-colors hover:border-accent/50 hover:text-accent"
+                  >
+                    <BrandIcon name={s.brand} class="size-[1.125rem]" />
+                  </a>
                 </li>
-              ))}
-            </ul>
-            <div class="mt-auto flex flex-wrap gap-1.5 pt-5">
-              {p.stack.map((s) => (
-                <span class="rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-[0.6875rem] text-subtle">{s}</span>
-              ))}
-            </div>
-          </Tag>
-        );
-      })}
-    </div>
-  </Container>
-
-  <!-- Capabilities -->
-  <Container class="pb-16 sm:pb-24">
-    <SectionHeading eyebrow="// capabilities" title="What I can do" class="mb-8" />
-    <div class="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
-      {capabilities.map((c) => (
-        <div class="bg-elevated p-5 sm:p-6">
-          <h3 class="font-semibold tracking-tight text-fg">{c.area}</h3>
-          <ul class="mt-3 space-y-2">
-            {c.points.map((pt) => (
-              <li class="flex items-start gap-2 text-sm text-muted">
-                <span class="mt-2 size-1 shrink-0 rounded-full bg-accent" />
-                <span>{pt}</span>
-              </li>
-            ))}
+              ))
+            }
+            <li>
+              <a
+                href={`mailto:${siteConfig.socials.email}`}
+                aria-label="Email"
+                class="flex size-10 items-center justify-center rounded-lg border border-line bg-elevated text-muted transition-colors hover:border-accent/50 hover:text-accent"
+              >
+                <Mail class="size-[1.125rem]" />
+              </a>
+            </li>
           </ul>
         </div>
-      ))}
-    </div>
-  </Container>
-
-  <!-- Skills -->
-  <Container class="pb-16 sm:pb-24">
-    <SectionHeading eyebrow="// skills" title="What I work with" class="mb-8" />
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {skillGroups.map((g) => (
-        <SkillGroup label={g.label} icon={g.icon} skills={g.skills} />
-      ))}
-    </div>
-  </Container>
-
-  <!-- Rig + fun facts -->
-  <Container class="pb-16 sm:pb-24">
-    <div class="grid gap-4 lg:grid-cols-2">
-      <div class="rounded-xl border border-line bg-elevated p-5 sm:p-6">
-        <p class="font-mono text-xs uppercase tracking-widest text-accent">// rig</p>
-        <h3 class="mt-1 text-lg font-semibold tracking-tight text-fg">The setup</h3>
-        <dl class="mt-4 divide-y divide-line">
-          {rig.map((row) => (
-            <div class="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-              <row.icon class="mt-0.5 size-4 shrink-0 text-subtle" />
-              <div class="min-w-0">
-                <dt class="font-mono text-[0.6875rem] uppercase tracking-wide text-subtle">{row.label}</dt>
-                <dd class="mt-0.5 text-sm text-fg">{row.value}</dd>
-              </div>
-            </div>
-          ))}
-        </dl>
-        <p class="mt-5 font-mono text-xs text-subtle">
-          Primary languages: <span class="text-muted">{siteConfig.persona.primaryLanguages.join(', ')}</span>
-        </p>
-        <p class="mt-1.5 font-mono text-xs text-subtle">
-          Go-to tools: <span class="text-muted">{siteConfig.persona.favoriteSecurityTools.join(', ')}</span>
-        </p>
       </div>
+      <div class="hero-card pt-14 sm:pt-16">
+        <IdCard />
+      </div>
+    </Container>
+  </section>
 
-      <div class="rounded-xl border border-line bg-elevated p-5 sm:p-6">
-        <p class="font-mono text-xs uppercase tracking-widest text-accent">// fun facts</p>
-        <h3 class="mt-1 text-lg font-semibold tracking-tight text-fg">A few things about me</h3>
-        <ul class="mt-4 space-y-3">
-          {siteConfig.persona.funFacts.map((fact) => (
-            <li class="flex items-start gap-2.5 text-sm text-muted">
-              <Sparkles class="mt-0.5 size-4 shrink-0 text-accent" />
-              <span>{fact}</span>
+  <!-- 2. bio -->
+  <section id="bio" class={`${sec} bg-surface`}>
+    <Container>
+      <div data-reveal>
+        <SectionCmd cmd="cat bio.txt" />
+        <SectionHeading class="mt-4" title="The story so far" />
+      </div>
+      <div class="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
+        <div class="max-w-2xl">
+          <p data-reveal class="text-lg leading-[1.75] text-muted">{bio[0]}</p>
+          <div data-reveal class="pullquote relative mt-8 border-l-2 border-accent pl-6 sm:pl-8">
+            <p class="text-lg leading-[1.75] text-muted sm:text-xl sm:leading-[1.7]">
+              {
+                bio2 ? (
+                  <>
+                    {bio2[0]}
+                    <mark class="loop-mark font-medium text-fg">{bio2[1]}</mark>
+                    {bio2[2]}
+                  </>
+                ) : (
+                  bio[1]
+                )
+              }
+            </p>
+          </div>
+        </div>
+        <aside aria-label="Fun facts" class="lg:sticky lg:top-40 lg:self-start">
+          <p data-reveal class="mb-4 font-mono text-xs text-subtle"># funfacts.txt</p>
+          <ul class="grid gap-4">
+            {
+              siteConfig.persona.funFacts.map((f, i) => (
+                <li data-reveal class:list={['note relative rounded-lg border border-line-strong bg-elevated p-4 pt-5 font-mono text-[0.8125rem] leading-relaxed text-muted shadow-sm', i % 2 === 0 ? 'lg:-rotate-1' : 'lg:rotate-1']}>
+                  <span aria-hidden="true" class="absolute -top-2 left-4 h-4 w-12 rounded-sm bg-accent/25"></span>
+                  <span class="mr-1 text-accent">0{i + 1}</span>
+                  {f}
+                </li>
+              ))
+            }
+          </ul>
+        </aside>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 3. projects -->
+  <section id="projects" class={sec}>
+    <Container>
+      <div data-reveal>
+        <SectionCmd cmd="ls -la ~/projects" />
+        <SectionHeading class="mt-4" title="Things I've built" description="Tools and labs that came out of the CTF and homelab hours." />
+      </div>
+      <p data-reveal class="mt-10 overflow-x-auto whitespace-pre rounded-t-xl border border-b-0 border-line bg-surface px-4 py-2.5 font-mono text-xs text-subtle">{dirLine}</p>
+      <ul class="grid gap-px overflow-hidden rounded-b-xl border border-line bg-line md:grid-cols-2">
+        {
+          featuredProjects.map((p) => (
+            <li data-reveal class="proj group relative flex flex-col bg-elevated p-6 transition-[background-color,box-shadow] duration-200 hover:z-10 hover:bg-surface hover:shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent)_45%,transparent),0_0_32px_-8px_color-mix(in_srgb,var(--accent)_35%,transparent)]">
+              <div class="flex items-start justify-between gap-3">
+                <h3 class="text-lg font-semibold tracking-[-0.02em] text-fg">
+                  {p.link ? (
+                    <a href={p.link} class="after:absolute after:inset-0 hover:text-accent">
+                      {p.name}
+                    </a>
+                  ) : (
+                    p.name
+                  )}
+                </h3>
+                <div class="flex shrink-0 items-center gap-2">
+                  <Badge tone={statusTone[p.status]}>{p.status}</Badge>
+                  {p.link && <ArrowUpRight class="size-4 text-subtle transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-accent" />}
+                </div>
+              </div>
+              <p class="mt-2 text-[0.9375rem] leading-relaxed text-muted">{p.summary}</p>
+              <ul class="mt-4 space-y-2">
+                {
+                  p.highlights.map((h) => (
+                    <li class="flex gap-2.5 text-sm leading-snug text-muted">
+                      <Check class="mt-0.5 size-4 shrink-0 text-accent" />
+                      <span>{h}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+              <ul class="mt-auto flex flex-wrap gap-1.5 pt-5">
+                {p.stack.map((s) => <li class="rounded-md border border-line bg-bg px-2 py-0.5 font-mono text-[0.6875rem] text-subtle">{s}</li>)}
+              </ul>
             </li>
-          ))}
-        </ul>
+          ))
+        }
+      </ul>
+    </Container>
+  </section>
+
+  <!-- 4. skills -->
+  <section id="skills" class={`${sec} bg-surface`}>
+    <Container>
+      <div data-reveal>
+        <SectionCmd cmd="./skills --matrix" />
+        <SectionHeading class="mt-4" title="What I can actually do" description="Every technique below is backed by a lab, a writeup or a project." />
       </div>
-    </div>
-  </Container>
-
-  <!-- Learning path -->
-  <Container class="pb-16 sm:pb-24">
-    <SectionHeading eyebrow="// learning" title="Learning path" class="mb-8" />
-    <ol class="divide-y divide-line rounded-xl border border-line bg-elevated">
-      {learningPath.map((item) => {
-        const Icon = learningIcon[item.status];
-        return (
-          <li class="flex items-start gap-3 p-4 sm:items-center sm:p-5">
-            <Icon class:list={['mt-0.5 size-4 shrink-0 sm:mt-0', item.status === 'Next' ? 'text-subtle' : 'text-accent']} />
-            <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between sm:gap-6">
-              <div class="min-w-0">
-                <p class="font-medium text-fg">{item.name}</p>
-                <p class="mt-0.5 text-sm text-muted">{item.note}</p>
-              </div>
-              <span class="mt-2 inline-block shrink-0 font-mono text-xs text-subtle sm:mt-0">{item.status}</span>
-            </div>
-          </li>
-        );
-      })}
-    </ol>
-  </Container>
-
-  <!-- Timeline -->
-  <Container class="pb-16 sm:pb-24">
-    <SectionHeading eyebrow="// journey" title="Milestones" class="mb-8" />
-    <Timeline milestones={timeline} />
-  </Container>
-
-  <!-- Socials + contact -->
-  <Container class="pb-20 sm:pb-28">
-    <div class="rounded-xl border border-line bg-elevated p-8 text-center sm:p-12">
-      <p class="font-mono text-xs uppercase tracking-widest text-accent">// connect</p>
-      <h2 class="mt-3 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">Let's talk security.</h2>
-      <p class="mx-auto mt-3 max-w-xl text-muted">
-        Reach out about CTF teams, internships, project collaborations, or just to say hi.
-      </p>
-      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-        <Button href="/contact" variant="primary">Contact me</Button>
-        {aboutSocials.map((s) => (
-          <a
-            href={s.href}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={s.label}
-            class="inline-flex size-10 items-center justify-center rounded-lg border border-line text-muted transition-colors hover:border-accent/40 hover:text-accent"
-          >
-            <BrandIcon name={s.brand} />
-          </a>
-        ))}
+      <div class="mt-10">
+        <SkillMatrix />
       </div>
-    </div>
-  </Container>
+    </Container>
+  </section>
+
+  <!-- 5. learning -->
+  <section id="learning" class={sec}>
+    <Container>
+      <div data-reveal>
+        <SectionCmd cmd="learning --log" />
+        <SectionHeading class="mt-4" title="Quest log" description="Where I am on the path, and what unlocks next." />
+      </div>
+      <div class="mt-10">
+        <QuestLog />
+      </div>
+    </Container>
+  </section>
+
+  <!-- 6. git log -->
+  <section id="log" class={`${sec} bg-surface`}>
+    <Container>
+      <div data-reveal>
+        <SectionCmd cmd="git log --graph --oneline" />
+        <SectionHeading class="mt-4" title="Commit history" description="Milestones, newest first." />
+      </div>
+      <div class="mt-12">
+        <GitLog />
+      </div>
+    </Container>
+  </section>
+
+  <!-- 7. rig -->
+  <section id="rig" class={sec}>
+    <Container>
+      <div data-reveal>
+        <SectionCmd cmd="cat ~/.config/rig" />
+        <SectionHeading class="mt-4" title="The setup" description="What I run everything on, written down as a dotfile." />
+      </div>
+      <div class="mt-10 max-w-4xl">
+        <RigConfig />
+      </div>
+    </Container>
+  </section>
+
+  <!-- 8. contact -->
+  <section id="contact" class={`${sec} bg-surface`}>
+    <Container>
+      <div data-reveal class="relative overflow-hidden rounded-2xl border border-line-strong bg-elevated px-6 py-12 text-center sm:px-12 sm:py-16">
+        <div aria-hidden="true" class="bg-glow pointer-events-none absolute inset-0 opacity-70"></div>
+        <div class="relative">
+          <SectionCmd cmd="./contact" class="justify-center" />
+          <h2 class="mt-5 text-3xl font-semibold tracking-[-0.03em] text-fg sm:text-4xl">Let's talk security.</h2>
+          <p class="mx-auto mt-4 max-w-lg text-muted">
+            Have a bug, a box, a collaboration idea or just a question? My inbox is open.
+          </p>
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button href={`mailto:${siteConfig.socials.email}`} variant="primary" size="lg"><Mail class="size-4" /> {siteConfig.socials.email}</Button>
+            <Button href="/contact" variant="secondary" size="lg">Contact page</Button>
+          </div>
+          <ul class="mt-6 flex items-center justify-center gap-2" aria-label="Social links">
+            {
+              socials.map((s) => (
+                <li>
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    class="flex size-10 items-center justify-center rounded-lg border border-line bg-bg text-muted transition-colors hover:border-accent/50 hover:text-accent"
+                  >
+                    <BrandIcon name={s.brand} class="size-[1.125rem]" />
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </Container>
+  </section>
 </BaseLayout>
+
+<style>
+  .loop-mark {
+    background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 28%, transparent) 62%);
+    padding: 0 0.1em;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-out {
+      animation: about-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) 700ms both;
+    }
+    .hero-card {
+      animation: about-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) 900ms both;
+    }
+  }
+  @keyframes about-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+</style>

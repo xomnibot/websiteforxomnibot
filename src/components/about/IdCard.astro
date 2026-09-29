@@ -1,0 +1,222 @@
+---
+/** Operator ID card: generated identicon avatar, live fields from site data, holographic sheen on pointer move. */
+import { siteConfig } from '@/lib/site';
+import { timeline } from '@/data/timeline';
+
+const { persona, currentFocus } = siteConfig;
+
+// Deterministic PRNG seeded from the handle (FNV-1a -> mulberry32).
+const fnv = (s: string) => {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+};
+const seeded = (seed: number) => () => {
+  seed = (seed + 0x6d2b79f5) >>> 0;
+  let t = seed;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const rnd = seeded(fnv(persona.handle));
+
+// 7x7 mirrored identicon
+const N = 7;
+const CELL = 11;
+const GAP = 2;
+const PAD = 7;
+const size = PAD * 2 + N * CELL + (N - 1) * GAP;
+const cells: { x: number; y: number; o: number }[] = [];
+for (let y = 0; y < N; y++) {
+  for (let x = 0; x < 4; x++) {
+    if (rnd() > 0.5 || (x === 3 && y === 3)) {
+      const o = 0.55 + rnd() * 0.45;
+      const px = PAD + x * (CELL + GAP);
+      const py = PAD + y * (CELL + GAP);
+      cells.push({ x: px, y: py, o });
+      if (x < 3) cells.push({ x: PAD + (N - 1 - x) * (CELL + GAP), y: py, o });
+    }
+  }
+}
+
+// Barcode
+const bars: { x: number; w: number }[] = [];
+let bx = 0;
+while (bx < 236) {
+  const w = 1 + Math.floor(rnd() * 3);
+  if (rnd() > 0.32) bars.push({ x: bx, w });
+  bx += w + 1 + Math.floor(rnd() * 2);
+}
+const idHex = fnv(persona.handle + siteConfig.domain).toString(16).toUpperCase().padStart(8, '0');
+const since = Math.min(...timeline.map((t) => Number(t.year)));
+
+const fields = [
+  { label: 'Focus', value: currentFocus.learning, wide: true },
+  { label: 'Building', value: currentFocus.activeTool, wide: true },
+  { label: 'Stack', value: persona.primaryLanguages.join(' · '), wide: false },
+  { label: 'Since', value: String(since), wide: false },
+];
+---
+
+<div class="idcard-wrap relative mx-auto w-full max-w-[21.5rem] lg:mx-0 lg:ml-auto" data-idcard-wrap>
+  <!-- lanyard -->
+  <div aria-hidden="true" class="lanyard pointer-events-none absolute -top-14 left-1/2 h-16 w-9 -translate-x-1/2 sm:-top-16 sm:h-20">
+    <span class="absolute inset-y-0 left-0 w-[3px] rounded-full bg-line-strong"></span>
+    <span class="absolute inset-y-0 right-0 w-[3px] rounded-full bg-line-strong"></span>
+    <span class="absolute inset-x-[3px] inset-y-0 bg-accent/10"></span>
+  </div>
+
+  <div data-idcard class="idcard relative overflow-hidden rounded-[1.375rem] border border-line-strong bg-elevated shadow-[0_1px_0_0_var(--border),0_24px_48px_-24px_color-mix(in_srgb,var(--fg)_28%,transparent)]">
+    <div class="h-1 bg-gradient-to-r from-accent via-accent-2 to-accent"></div>
+
+    <div class="relative px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+      <!-- lanyard slot -->
+      <div aria-hidden="true" class="mx-auto mb-4 h-2.5 w-16 rounded-full border border-line-strong bg-bg shadow-inner"></div>
+
+      <div class="flex items-center justify-between font-mono text-[0.625rem] uppercase tracking-[0.14em] text-subtle">
+        <span>xomnibot lab</span>
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-accent">
+          <span class="size-1.5 rounded-full bg-accent"></span>clearance: learning
+        </span>
+      </div>
+
+      <div class="relative mx-auto mt-5 aspect-square w-40 overflow-hidden rounded-2xl border border-line bg-surface sm:w-44">
+        <svg viewBox={`0 0 ${size} ${size}`} class="size-full" role="img" aria-label={`Generated identicon for ${persona.handle}`}>
+          <defs>
+            <linearGradient id="id-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2={size} y2={size}>
+              <stop offset="0" style="stop-color:var(--accent)"></stop>
+              <stop offset="1" style="stop-color:var(--accent-2)"></stop>
+            </linearGradient>
+          </defs>
+          {cells.map((c) => <rect x={c.x} y={c.y} width={CELL} height={CELL} rx="2.5" fill="url(#id-grad)" opacity={c.o.toFixed(2)} />)}
+        </svg>
+        <span aria-hidden="true" class="absolute left-2 top-2 size-3 rounded-tl-md border-l-2 border-t-2 border-accent/60"></span>
+        <span aria-hidden="true" class="absolute right-2 top-2 size-3 rounded-tr-md border-r-2 border-t-2 border-accent/60"></span>
+        <span aria-hidden="true" class="absolute bottom-2 left-2 size-3 rounded-bl-md border-b-2 border-l-2 border-accent/60"></span>
+        <span aria-hidden="true" class="absolute bottom-2 right-2 size-3 rounded-br-md border-b-2 border-r-2 border-accent/60"></span>
+      </div>
+
+      <div class="mt-5 text-center">
+        <p class="text-2xl font-semibold tracking-[-0.03em] text-fg">{persona.handle}</p>
+        <p class="mt-1 text-sm text-muted">{persona.role}</p>
+      </div>
+
+      <dl class="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-dashed border-line-strong pt-4">
+        {
+          fields.map((f) => (
+            <div class:list={[f.wide && 'col-span-2']}>
+              <dt class="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-subtle">{f.label}</dt>
+              <dd class="mt-0.5 font-mono text-[0.8125rem] leading-snug text-fg">{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <div class="mt-5 border-t border-dashed border-line-strong pt-4">
+        <svg viewBox="0 0 236 26" preserveAspectRatio="none" class="h-7 w-full text-fg/80" aria-hidden="true">
+          {bars.map((b) => <rect x={b.x} y="0" width={b.w} height="26" fill="currentColor" />)}
+        </svg>
+        <p class="mt-2 flex justify-between font-mono text-[0.625rem] uppercase tracking-[0.14em] text-subtle">
+          <span>ID {idHex}</span><span>{siteConfig.domain}</span>
+        </p>
+      </div>
+    </div>
+
+    <div aria-hidden="true" class="idcard-sheen pointer-events-none absolute inset-0"></div>
+  </div>
+</div>
+
+<style>
+  .idcard-wrap {
+    perspective: 900px;
+  }
+  .idcard {
+    --mx: 30%;
+    --my: 18%;
+    --rx: 0deg;
+    --ry: 0deg;
+    transform: rotateX(var(--rx)) rotateY(var(--ry));
+    transform-style: preserve-3d;
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .idcard-sheen {
+    opacity: 0.4;
+    mix-blend-mode: normal;
+    background:
+      radial-gradient(
+        320px circle at var(--mx) var(--my),
+        color-mix(in srgb, var(--fg) 9%, transparent),
+        transparent 60%
+      ),
+      linear-gradient(
+        115deg,
+        transparent 20%,
+        color-mix(in srgb, var(--accent) 22%, transparent) 38%,
+        color-mix(in srgb, var(--accent-2) 24%, transparent) 50%,
+        color-mix(in srgb, var(--status-amber) 16%, transparent) 62%,
+        transparent 80%
+      );
+    background-size: 100% 100%, 240% 240%;
+    background-position: 0 0, var(--mx) var(--my);
+    transition: opacity 300ms ease;
+  }
+  .idcard.is-live {
+    transition: transform 90ms linear;
+  }
+  .idcard.is-live .idcard-sheen {
+    opacity: 0.85;
+  }
+  .lanyard {
+    -webkit-mask-image: linear-gradient(to top, #000 40%, transparent);
+    mask-image: linear-gradient(to top, #000 40%, transparent);
+  }
+</style>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function init() {
+    cleanup?.();
+    cleanup = null;
+    const card = document.querySelector<HTMLElement>('[data-idcard]');
+    if (!card) return;
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!fine.matches || reduce.matches) return;
+
+    const onMove = (e: PointerEvent) => {
+      const r = card.getBoundingClientRect();
+      const px = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      const py = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+      card.classList.add('is-live');
+      card.style.setProperty('--mx', `${(px * 100).toFixed(1)}%`);
+      card.style.setProperty('--my', `${(py * 100).toFixed(1)}%`);
+      card.style.setProperty('--ry', `${((px - 0.5) * 8).toFixed(2)}deg`);
+      card.style.setProperty('--rx', `${((0.5 - py) * 8).toFixed(2)}deg`);
+    };
+    const onLeave = () => {
+      card.classList.remove('is-live');
+      card.style.setProperty('--rx', '0deg');
+      card.style.setProperty('--ry', '0deg');
+      card.style.setProperty('--mx', '30%');
+      card.style.setProperty('--my', '18%');
+    };
+    card.addEventListener('pointermove', onMove);
+    card.addEventListener('pointerleave', onLeave);
+    cleanup = () => {
+      card.removeEventListener('pointermove', onMove);
+      card.removeEventListener('pointerleave', onLeave);
+    };
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    cleanup?.();
+    cleanup = null;
+  });
+</script>
