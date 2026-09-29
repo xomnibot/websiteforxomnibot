@@ -1,0 +1,55 @@
+---
+/** Retro shell for the Blog: BaseLayout + a paper panel scoped with `.retro-scope`. */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import Lightbox from '@/components/content/Lightbox.astro';
+import '@/styles/retro-blog.css';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: Date;
+  updatedTime?: Date;
+  zoom?: boolean;
+}
+const { zoom = false, ...seo } = Astro.props;
+---
+
+<BaseLayout {...seo}>
+  {zoom && <Lightbox />}
+  <Container class="py-8 sm:py-12">
+    <div class="retro-paper retro-scope">
+      <div class="retro-inner"><slot /></div>
+    </div>
+  </Container>
+</BaseLayout>
+
+{zoom && (
+  <script>
+    // Make images in retro posts click-to-zoom via the shared Lightbox (delegated on img[data-zoomable]).
+    function enhance() {
+      document.querySelectorAll<HTMLImageElement>('.retro-blog img').forEach((img) => {
+        if (img.dataset.zoomable !== undefined || img.closest('a') || img.hasAttribute('data-no-zoom')) return;
+        img.dataset.zoomable = '';
+        img.tabIndex = 0;
+        img.setAttribute('role', 'button');
+        img.setAttribute('aria-haspopup', 'dialog');
+        if (!img.hasAttribute('loading')) img.loading = 'lazy';
+        const alt = img.alt.trim();
+        if (alt && !img.closest('figure')) {
+          const fig = document.createElement('figure');
+          const cap = document.createElement('figcaption');
+          cap.textContent = alt;
+          const host = img.parentElement;
+          if (host?.tagName === 'P' && host.childNodes.length === 1) host.replaceWith(fig);
+          else img.replaceWith(fig);
+          fig.append(img, cap);
+        }
+      });
+    }
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  </script>
+)}

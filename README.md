@@ -80,6 +80,18 @@ The token is stored only in your browser's `localStorage` (never sent anywhere e
 API, never committed to the repo). Create one at
 [github.com/settings/personal-access-tokens](https://github.com/settings/personal-access-tokens/new).
 
+## Local blog editor (`/blogadmin`)
+
+A local-only editor for the personal Blog. It exists **only** under `npm run dev`; it is not part of
+the production build (no page, JS or sitemap entry).
+
+1. Run `npm run dev` and open <http://localhost:4321/blogadmin>.
+2. Click **New post**, fill title/date/tags, and write Markdown (paste or drop images; Obsidian
+   `![[img.png]]` embeds are converted on save). The live preview uses the blog styling.
+3. **Save** (or Ctrl/Cmd+S) writes `content/blog/<slug>.md`; frontmatter is generated for you.
+4. **Publish** commits only that post and its `public/media/blog/<slug>/` folder, scans the diff
+   for secrets, and runs `git push origin main`. Vercel then redeploys.
+
 ## Frontmatter reference
 
 `description`, `updated`, and `cover` are optional almost everywhere — if you skip `description`,

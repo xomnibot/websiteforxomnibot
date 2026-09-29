@@ -1,5 +1,60 @@
 ---
-import CollectionListing from '@/components/content/CollectionListing.astro';
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import RetroHeader from '@/components/blog/RetroHeader.astro';
+import AsciiRule from '@/components/blog/AsciiRule.astro';
+import { getPublished, entryDescription, entryReadingTime } from '@/lib/collections';
+
+const entries = await getPublished('blog');
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+const oneLine = (s: string) => (s.length > 140 ? `${s.slice(0, 140).replace(/\s+\S*$/, '')}…` : s);
 ---
 
-<CollectionListing collection="blog" />
+<BlogLayout title="Blog" description="Thoughts, journal entries and things on my mind.">
+  <RetroHeader />
+  <h1 class="retro-title">thoughts.txt</h1>
+  <p class="retro-muted" style="margin:0;line-height:1.6">
+    A personal corner. Not writeups, just what is on my mind.
+  </p>
+  <AsciiRule />
+
+  {entries.length > 1 && (
+    <label class="retro-search">
+      <span aria-hidden="true">grep</span>
+      <span class="sr-only">Search posts</span>
+      <input type="search" id="retro-q" placeholder="search entries..." autocomplete="off" />
+    </label>
+  )}
+
+  {entries.length === 0 ? (
+    <p class="retro-mono retro-muted">-- no entries yet. check back soon --</p>
+  ) : (
+    <ul class="retro-list">
+      {entries.map((e) => (
+        <li class="retro-entry" data-q={`${e.data.title} ${entryDescription(e)} ${e.data.tags.join(' ')}`.toLowerCase()}>
+          <div class="retro-entry-date">[{iso(e.data.date)}]</div>
+          <h2><a href={`/blog/${e.id}`}>{e.data.title}</a></h2>
+          <p>{oneLine(entryDescription(e))}</p>
+          <div class="retro-meta">
+            <span>{entryReadingTime(e)}</span>
+            {e.data.tags.map((t) => <span class="retro-tag">{t}</span>)}
+          </div>
+        </li>
+      ))}
+    </ul>
+  )}
+  <p class="retro-mono retro-muted text-sm" style="margin-top:1.5rem" aria-hidden="true">-- EOF --</p>
+</BlogLayout>
+
+<script>
+  function init() {
+    const q = document.getElementById('retro-q') as HTMLInputElement | null;
+    if (!q) return;
+    const items = document.querySelectorAll<HTMLElement>('.retro-entry');
+    q.addEventListener('input', () => {
+      const v = q.value.trim().toLowerCase();
+      items.forEach((li) => (li.hidden = !!v && !(li.dataset.q ?? '').includes(v)));
+    });
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

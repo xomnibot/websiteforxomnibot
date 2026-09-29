@@ -1,10 +1,10 @@
 ---
-/** Home hero: value statement, CTAs, and a "currently" focus card built from site data. */
+/** Home hero: full-viewport intro with CTAs, an animated recon terminal, and a "currently" strip. */
 import Container from '@/components/ui/Container.astro';
 import Button from '@/components/ui/Button.astro';
 import BrandIcon from '@/components/ui/BrandIcon.astro';
 import { siteConfig } from '@/lib/site';
-import { ArrowRight, GraduationCap, FlaskConical, Wrench, FileText } from '@lucide/astro';
+import { ArrowRight, ChevronDown, GraduationCap, FlaskConical, Wrench, FileText } from '@lucide/astro';
 
 const focus = [
   { label: 'Learning', value: siteConfig.currentFocus.learning, Icon: GraduationCap },
@@ -12,25 +12,49 @@ const focus = [
   { label: 'Building', value: siteConfig.currentFocus.activeTool, Icon: Wrench },
   { label: 'Next writeup', value: siteConfig.currentFocus.nextWriteup, Icon: FileText },
 ];
+
+// Split the tagline so the second half can carry the accent gradient.
+const words = siteConfig.tagline.split(' ');
+const amp = words.indexOf('&');
+const cut = amp > 0 ? amp + 1 : Math.ceil(words.length / 2);
+const headA = words.slice(0, cut).join(' ');
+const headB = words.slice(cut).join(' ');
+
+// Terminal script. `t` = seconds after load when the line starts.
+const lines: { kind: 'cmd' | 'out'; text: string; t: number; cls?: string }[] = [
+  { kind: 'cmd', text: 'nmap -sC -sV -p- 10.10.11.42', t: 0.6 },
+  { kind: 'out', text: '22/tcp   open  ssh     OpenSSH 8.9', t: 2.0 },
+  { kind: 'out', text: '80/tcp   open  http    nginx 1.18', t: 2.3 },
+  { kind: 'out', text: '445/tcp  open  smb     Samba 4.15', t: 2.6 },
+  { kind: 'cmd', text: 'gobuster dir -u http://target -w common.txt', t: 3.3 },
+  { kind: 'out', text: '/admin    (Status: 302)', t: 4.9 },
+  { kind: 'out', text: '/backup   (Status: 200)', t: 5.2 },
+  { kind: 'cmd', text: 'sudo -l', t: 5.9 },
+  { kind: 'out', text: '(root) NOPASSWD: /usr/bin/vim', t: 6.7 },
+  { kind: 'cmd', text: "sudo vim -c ':!/bin/sh'", t: 7.4 },
+  { kind: 'out', text: '# id → uid=0(root)', t: 8.9, cls: 'accent' },
+];
 ---
 
-<section class="relative overflow-hidden border-b border-line">
-  <div aria-hidden="true" class="bg-grid pointer-events-none absolute inset-0 opacity-60"></div>
-  <div aria-hidden="true" class="bg-glow pointer-events-none absolute inset-0 opacity-70"></div>
-  <Container class="relative py-16 sm:py-24 lg:py-28">
-    <div class="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-      <div>
-        <p class="inline-flex items-center gap-2 rounded-full border border-line bg-elevated px-3 py-1 font-mono text-xs text-muted">
-          <span class="size-1.5 rounded-full bg-accent"></span>
+<section class="hero relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden border-b border-line">
+  <div aria-hidden="true" class="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-60"></div>
+  <div aria-hidden="true" class="bg-glow pointer-events-none absolute inset-0 -z-10 opacity-70"></div>
+  <div aria-hidden="true" class="hero-orb pointer-events-none absolute -z-10"></div>
+
+  <Container class="relative flex flex-1 items-center py-14 sm:py-16 lg:py-20">
+    <div class="grid w-full items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+      <div class="min-w-0">
+        <p class="hero-rise inline-flex items-center gap-2 rounded-full border border-line bg-elevated px-3 py-1 font-mono text-xs text-muted" style="--d:0s">
+          <span class="hero-dot size-1.5 rounded-full bg-accent"></span>
           {siteConfig.persona.handle} &middot; {siteConfig.persona.role}
         </p>
-        <h1 class="mt-6 text-4xl font-semibold tracking-tight text-fg sm:text-5xl lg:text-6xl lg:leading-[1.05]">
-          {siteConfig.tagline}.
+        <h1 class="hero-rise mt-6 text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-fg sm:text-6xl xl:text-[4.25rem]" style="--d:.08s">
+          {`${headA} `}<span class="hero-grad">{headB}</span>
         </h1>
-        <p class="mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+        <p class="hero-rise mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg" style="--d:.16s">
           {siteConfig.mission}
         </p>
-        <div class="mt-8 flex flex-wrap items-center gap-3">
+        <div class="hero-rise mt-9 flex flex-wrap items-center gap-3" style="--d:.24s">
           <Button href="/writeups" variant="primary" size="lg">
             Read writeups
             <ArrowRight class="size-4" />
@@ -40,7 +64,6 @@ const focus = [
             href={siteConfig.socials.github}
             target="_blank"
             rel="noreferrer"
-            aria-label="GitHub"
             class="inline-flex h-12 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted transition-colors hover:text-fg"
           >
             <BrandIcon name="github" class="size-4" />
@@ -49,30 +72,127 @@ const focus = [
         </div>
       </div>
 
-      <div class="rounded-2xl border border-line bg-elevated shadow-sm">
-        <div class="flex items-center justify-between border-b border-line px-5 py-3">
-          <p class="font-mono text-xs uppercase tracking-widest text-subtle">Currently</p>
-          <span class="flex items-center gap-1.5 font-mono text-xs text-muted">
-            <span class="size-1.5 rounded-full bg-accent"></span>
-            active
-          </span>
+      <div class="hero-rise min-w-0" style="--d:.2s">
+        <div class="overflow-hidden rounded-xl border border-line-strong bg-elevated shadow-lg shadow-black/5 dark:shadow-black/40">
+          <div class="flex items-center gap-2 border-b border-line bg-surface px-4 py-2.5">
+            <span class="size-2.5 rounded-full bg-red/70"></span>
+            <span class="size-2.5 rounded-full bg-amber/70"></span>
+            <span class="size-2.5 rounded-full bg-green/70"></span>
+            <span class="ml-2 truncate font-mono text-xs text-subtle">{siteConfig.persona.handle}@kali: ~/ctf</span>
+          </div>
+          <div class="hero-term h-[19rem] overflow-hidden px-4 py-4 font-mono text-[12px] leading-6 sm:h-[20rem] sm:text-[13px]" role="img" aria-label="Animated terminal showing a recon and privilege escalation sequence">
+            {
+              lines.map((l) => (
+                <div class:list={['hero-line whitespace-pre', l.kind === 'out' ? (l.cls === 'accent' ? 'text-accent' : 'text-muted') : 'text-fg']} style={`--t:${l.t}s`}>
+                  {l.kind === 'cmd' && <span class="text-accent">$ </span>}
+                  <span class={l.kind === 'cmd' ? 'hero-type' : ''} style={l.kind === 'cmd' ? `--n:${l.text.length}` : undefined}>{l.text}</span>
+                </div>
+              ))
+            }
+            <div class="hero-line" style="--t:9.4s"><span class="text-accent">$ </span><span class="hero-caret"></span></div>
+          </div>
         </div>
-        <ul class="divide-y divide-line">
+
+        <dl class="mt-4 grid grid-cols-2 gap-2.5">
           {
             focus.map(({ label, value, Icon }) => (
-              <li class="flex items-start gap-3 px-5 py-4">
-                <span class="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-line bg-surface text-accent">
-                  <Icon class="size-4" />
-                </span>
-                <div class="min-w-0">
-                  <p class="text-xs font-medium text-subtle">{label}</p>
-                  <p class="mt-0.5 text-sm text-fg">{value}</p>
-                </div>
-              </li>
+              <div class="min-w-0 rounded-lg border border-line bg-elevated/70 px-3 py-2.5">
+                <dt class="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-subtle">
+                  <Icon class="size-3 text-accent" />
+                  {label}
+                </dt>
+                <dd class="mt-1 line-clamp-2 text-xs leading-snug text-fg">{value}</dd>
+              </div>
             ))
           }
-        </ul>
+        </dl>
       </div>
     </div>
   </Container>
+
+  <div class="relative flex justify-center pb-6">
+    <button type="button" data-hero-scroll aria-label="Scroll down" class="hero-cue inline-flex size-10 items-center justify-center rounded-full border border-line bg-elevated text-muted transition-colors hover:text-fg">
+      <ChevronDown class="size-4" />
+    </button>
+  </div>
 </section>
+
+<style>
+  .hero-orb {
+    width: 38rem;
+    height: 38rem;
+    right: -10rem;
+    top: -8rem;
+    border-radius: 9999px;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent);
+    animation: hero-drift 18s ease-in-out infinite alternate;
+  }
+  .hero-grad {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-dot {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
+    animation: hero-pulse 2.4s ease-out infinite;
+  }
+  .hero-rise {
+    animation: hero-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: var(--d, 0s);
+  }
+  .hero-line {
+    opacity: 0;
+    animation: hero-show 0.01s linear forwards;
+    animation-delay: var(--t);
+  }
+  .hero-type {
+    display: inline-block;
+    vertical-align: bottom;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: hero-typing calc(var(--n) * 0.035s) steps(var(--n), end) forwards;
+    animation-delay: var(--t);
+  }
+  .hero-caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    vertical-align: text-bottom;
+    background: var(--fg-muted);
+    animation: hero-blink 1s steps(1) infinite;
+  }
+  .hero-cue {
+    animation: hero-bob 2.2s ease-in-out infinite;
+  }
+  @keyframes hero-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes hero-show { to { opacity: 1; } }
+  @keyframes hero-typing { to { width: calc((var(--n) + 1) * 1ch); } }
+  @keyframes hero-blink { 50% { opacity: 0; } }
+  @keyframes hero-bob { 50% { transform: translateY(4px); } }
+  @keyframes hero-drift { to { transform: translate(-6rem, 4rem); } }
+  @keyframes hero-pulse {
+    70% { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-orb, .hero-dot, .hero-rise, .hero-cue, .hero-caret { animation: none; }
+    .hero-line { animation: none; opacity: 1; }
+    .hero-type { animation: none; width: auto; }
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const btn = document.querySelector<HTMLButtonElement>('[data-hero-scroll]');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollBy({ top: window.innerHeight * 0.85, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  });
+</script>

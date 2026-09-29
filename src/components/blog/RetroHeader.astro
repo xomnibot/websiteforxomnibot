@@ -1,0 +1,9 @@
+---
+/** Retro page masthead: `~/blog — thoughts.txt` path line + optional ASCII rule. */
+interface Props { path?: string }
+const { path = '~/blog — thoughts.txt' } = Astro.props;
+---
+
+<div class="retro-mono retro-muted text-sm" aria-hidden="true">
+  <span>guest@xomnibot</span>:<span>{path}</span><span class="retro-cursor"></span>
+</div>

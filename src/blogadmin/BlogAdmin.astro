@@ -1,0 +1,195 @@
+---
+import '@/styles/global.css';
+
+// retro-blog.css is owned by another agent; glob tolerates it not existing yet.
+const found = import.meta.glob('/src/styles/retro-blog.css', { query: '?inline', import: 'default', eager: true });
+const retroCss = (Object.values(found)[0] as string | undefined) ?? '';
+const fallbackCss = `.retro-blog{font-family:ui-monospace,Menlo,monospace;line-height:1.6}
+.retro-blog img{max-width:100%}.retro-blog pre{overflow:auto;padding:.75rem;background:var(--color-surface)}
+.retro-blog table{border-collapse:collapse}.retro-blog th,.retro-blog td{border:1px solid var(--color-line);padding:.25rem .5rem}`;
+const today = new Date();
+const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>blogadmin (local)</title>
+    <script is:inline>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches))
+          document.documentElement.classList.add('dark');
+      } catch (e) {}
+    </script>
+    <style is:global set:html={retroCss || fallbackCss} />
+    <style is:global>
+      body { font-family: ui-monospace, "Geist Mono Variable", Menlo, monospace; font-size: 14px; background: var(--color-bg); color: var(--color-fg); margin: 0; }
+      #ba { display: grid; grid-template-columns: 220px minmax(0,1fr) minmax(0,1fr); height: 100vh; }
+      #ba aside { border-right: 1px solid var(--color-line); overflow: auto; padding: .75rem; background: var(--color-elevated); }
+      #ba aside h1 { font-size: 1rem; margin: 0 0 .5rem; }
+      #ba .post { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--color-fg); padding: .35rem .25rem; cursor: pointer; border-bottom: 1px dashed var(--color-line); font: inherit; }
+      #ba .post:hover, #ba .post.on { background: var(--color-surface); }
+      #ba .post small { display: block; color: var(--color-muted); }
+      #ba .ed { display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--color-line); }
+      #ba .form { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; padding: .6rem; border-bottom: 1px solid var(--color-line); }
+      #ba .form label { display: flex; flex-direction: column; font-size: 11px; color: var(--color-muted); gap: 2px; }
+      #ba .form .wide { grid-column: 1 / -1; }
+      #ba input[type=text], #ba input[type=date] { font: inherit; padding: .3rem; background: var(--color-bg); color: var(--color-fg); border: 1px solid var(--color-line-strong); border-radius: 2px; }
+      #ba textarea { flex: 1; resize: none; border: 0; outline: 0; padding: 1rem; font: 14px/1.6 ui-monospace, Menlo, monospace; background: var(--color-bg); color: var(--color-fg); tab-size: 2; }
+      #ba button.b { font: inherit; padding: .3rem .7rem; border: 1px solid var(--color-line-strong); background: var(--color-surface); color: var(--color-fg); cursor: pointer; border-radius: 2px; }
+      #ba button.b:hover { border-color: var(--color-accent); }
+      #ba button.danger { color: var(--color-red); }
+      #ba .bar { display: flex; gap: .5rem; align-items: center; padding: .5rem .6rem; border-top: 1px solid var(--color-line); flex-wrap: wrap; }
+      #ba .pv { overflow: auto; padding: 1.25rem; min-width: 0; }
+      #status { color: var(--color-muted); }
+      #log { white-space: pre-wrap; font-size: 12px; max-height: 10rem; overflow: auto; padding: .5rem .6rem; border-top: 1px solid var(--color-line); background: var(--color-elevated); display: none; }
+      #ba textarea.drag { outline: 2px dashed var(--color-accent); }
+      @media (max-width: 900px) { #ba { grid-template-columns: 1fr; height: auto; } #ba textarea { min-height: 50vh; } }
+    </style>
+  </head>
+  <body>
+    <div id="ba">
+      <aside>
+        <h1>blogadmin <small style="color:var(--color-muted)">(local)</small></h1>
+        <button class="b" id="new" type="button">+ New post</button>
+        <div id="list" style="margin-top:.5rem"></div>
+      </aside>
+      <section class="ed">
+        <div class="form">
+          <label class="wide">title *<input type="text" id="title" autocomplete="off" /></label>
+          <label>slug<input type="text" id="slug" autocomplete="off" /></label>
+          <label>date<input type="date" id="date" value={localToday} /></label>
+          <label class="wide">description (optional)<input type="text" id="desc" autocomplete="off" /></label>
+          <label>tags (comma separated)<input type="text" id="tags" autocomplete="off" /></label>
+          <label style="flex-direction:row;align-items:center;gap:.4rem;font-size:13px;color:var(--color-fg)"><input type="checkbox" id="draft" /> draft</label>
+        </div>
+        <textarea id="body" spellcheck="true" placeholder="Write Markdown here. Drop or paste images. Ctrl/Cmd+S saves."></textarea>
+        <div class="bar">
+          <button class="b" id="save" type="button">Save</button>
+          <button class="b" id="publish" type="button">Publish (git push)</button>
+          <button class="b danger" id="del" type="button">Delete</button>
+          <a id="view" href="#" target="_blank" style="color:var(--color-accent)" hidden>view /blog/…</a>
+          <span id="status"></span>
+        </div>
+        <pre id="log"></pre>
+      </section>
+      <section class="pv"><article class="retro-blog" id="preview"></article></section>
+    </div>
+
+    <script is:inline define:vars={{ localToday }}>
+      const $ = (id) => document.getElementById(id);
+      const api = (p, o) => fetch('/blogadmin/api/' + p, o && o.method ? { ...o, headers: { 'content-type': 'application/json' } } : o).then((r) => r.json());
+      let originalSlug = null, extra = {}, slugTouched = false, dirty = false;
+      const slugify = (s) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+      const status = (t) => ($('status').textContent = t);
+      const showLog = (t) => { const l = $('log'); l.style.display = t ? 'block' : 'none'; l.textContent = t || ''; };
+
+      async function refresh() {
+        const { posts } = await api('posts');
+        $('list').innerHTML = '';
+        for (const p of posts) {
+          const b = document.createElement('button');
+          b.className = 'post' + (p.slug === originalSlug ? ' on' : '');
+          b.type = 'button';
+          b.textContent = p.title;
+          const s = document.createElement('small');
+          s.textContent = p.date + (p.draft ? ' [draft]' : '');
+          b.append(s);
+          b.onclick = () => openPost(p.slug);
+          $('list').append(b);
+        }
+      }
+      function reset() {
+        originalSlug = null; extra = {}; slugTouched = false; dirty = false;
+        for (const id of ['title', 'slug', 'desc', 'tags', 'body']) $(id).value = '';
+        $('date').value = localToday; $('draft').checked = false;
+        $('view').hidden = true; showLog(''); status(''); render();
+      }
+      async function openPost(slug) {
+        const d = await api('post?slug=' + encodeURIComponent(slug));
+        if (d.error) return status(d.error);
+        originalSlug = d.slug; extra = d.extra || {}; slugTouched = true; dirty = false;
+        $('title').value = d.title; $('slug').value = d.slug; $('date').value = d.date;
+        $('desc').value = d.description; $('tags').value = d.tags.join(', ');
+        $('draft').checked = d.draft; $('body').value = d.body;
+        setView(); showLog(''); status('opened'); render(); refresh();
+      }
+      function setView() {
+        const v = $('view'); v.hidden = !originalSlug; v.href = '/blog/' + originalSlug; v.textContent = 'view /blog/' + originalSlug;
+      }
+      let t;
+      function render() {
+        clearTimeout(t);
+        t = setTimeout(async () => {
+          const r = await api('preview', { method: 'POST', body: JSON.stringify({ body: $('body').value, slug: $('slug').value }) });
+          $('preview').innerHTML = r.html;
+        }, 250);
+      }
+      async function save() {
+        const slug = $('slug').value.trim();
+        if (!$('title').value.trim()) { status('title is required'); $('title').focus(); return false; }
+        const r = await api('post', { method: 'POST', body: JSON.stringify({
+          title: $('title').value, slug, originalSlug, date: $('date').value, description: $('desc').value,
+          tags: $('tags').value.split(','), draft: $('draft').checked, extra, body: $('body').value }) });
+        if (r.error) { status('ERROR: ' + r.error); return false; }
+        if (r.body !== undefined && r.body.trim() !== $('body').value.trim()) $('body').value = r.body.replace(/^\n/, '');
+        originalSlug = slug; dirty = false; setView(); status('saved ' + r.file + ' at ' + new Date().toLocaleTimeString());
+        render(); refresh(); return true;
+      }
+      $('title').addEventListener('input', () => { if (!slugTouched) $('slug').value = slugify($('title').value); dirty = true; });
+      $('slug').addEventListener('input', () => { slugTouched = true; dirty = true; });
+      for (const id of ['date', 'desc', 'tags', 'draft']) $(id).addEventListener('input', () => (dirty = true));
+      $('body').addEventListener('input', () => { dirty = true; render(); });
+      $('slug').addEventListener('input', render);
+      $('new').onclick = () => { if (!dirty || confirm('Discard unsaved changes?')) reset(); };
+      $('save').onclick = save;
+      addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(); } });
+      addEventListener('beforeunload', (e) => { if (dirty) e.preventDefault(); });
+      $('body').addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        e.preventDefault();
+        const ta = e.target, s = ta.selectionStart;
+        ta.setRangeText('  ', s, ta.selectionEnd, 'end'); dirty = true; render();
+      });
+      async function upload(file) {
+        let slug = $('slug').value.trim();
+        if (!slug) { status('enter a title/slug before adding images'); return; }
+        const name = file.name && file.name !== 'image.png' ? file.name : 'pasted-' + Date.now() + '.' + ((file.type.split('/')[1] || 'png').replace('jpeg', 'jpg').replace('svg+xml', 'svg'));
+        const r = await fetch('/blogadmin/api/image?slug=' + encodeURIComponent(slug) + '&name=' + encodeURIComponent(name), { method: 'POST', body: file }).then((x) => x.json());
+        if (r.error) return status('ERROR: ' + r.error);
+        const ta = $('body');
+        ta.setRangeText('![' + r.name.replace(/\.[^.]+$/, '') + '](' + r.url + ')\n', ta.selectionStart, ta.selectionEnd, 'end');
+        dirty = true; render(); status('image saved: ' + r.url);
+      }
+      $('body').addEventListener('paste', (e) => {
+        const fs = [...(e.clipboardData?.files || [])].filter((f) => f.type.startsWith('image/'));
+        if (fs.length) { e.preventDefault(); fs.forEach(upload); }
+      });
+      $('body').addEventListener('dragover', (e) => { e.preventDefault(); $('body').classList.add('drag'); });
+      $('body').addEventListener('dragleave', () => $('body').classList.remove('drag'));
+      $('body').addEventListener('drop', (e) => {
+        e.preventDefault(); $('body').classList.remove('drag');
+        [...e.dataTransfer.files].filter((f) => f.type.startsWith('image/')).forEach(upload);
+      });
+      $('del').onclick = async () => {
+        if (!originalSlug) return status('nothing to delete');
+        if (!confirm('Delete content/blog/' + originalSlug + ' and its media folder?')) return;
+        const r = await api('post?slug=' + encodeURIComponent(originalSlug), { method: 'DELETE' });
+        if (r.error) return status('ERROR: ' + r.error);
+        reset(); refresh(); status('deleted');
+      };
+      $('publish').onclick = async () => {
+        if (!(await save())) return;
+        if (!confirm('Commit and push "' + $('title').value + '" to origin main?')) return;
+        showLog('publishing...');
+        const r = await api('publish', { method: 'POST', body: JSON.stringify({ slug: originalSlug, title: $('title').value }) });
+        showLog((r.ok ? 'OK\n' : 'FAILED\n') + r.log);
+      };
+      reset(); refresh();
+    </script>
+  </body>
+</html>

@@ -1,6 +1,10 @@
 ---
-import PostLayout from '@/layouts/PostLayout.astro';
-import { getPublished } from '@/lib/collections';
+import { render } from 'astro:content';
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import RetroHeader from '@/components/blog/RetroHeader.astro';
+import AsciiRule from '@/components/blog/AsciiRule.astro';
+import { mdxComponents } from '@/components/mdx';
+import { getPublished, getAdjacent, entryDescription, entryReadingTime } from '@/lib/collections';
 import type { CollectionEntry } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -13,6 +17,39 @@ interface Props {
 }
 
 const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { prev, next } = await getAdjacent(entry);
+const description = entryDescription(entry);
+const iso = entry.data.date.toISOString().slice(0, 10);
 ---
 
-<PostLayout entry={entry} />
+<BlogLayout
+  title={entry.data.title}
+  description={description || entry.data.title}
+  image={entry.data.cover}
+  type="article"
+  publishedTime={entry.data.date}
+  updatedTime={entry.data.updated}
+  zoom
+>
+  <RetroHeader path={`~/blog/${entry.id}.txt`} />
+  <p class="retro-back" style="margin:1rem 0 0"><a href="/blog">&lt;- back to /blog</a></p>
+  <h1 class="retro-title">{entry.data.title}</h1>
+  <div class="retro-meta">
+    <time datetime={iso}>[{iso}]</time>
+    <span>{entryReadingTime(entry)}</span>
+    {entry.data.tags.map((t) => <span class="retro-tag">{t}</span>)}
+  </div>
+  <AsciiRule />
+
+  <article class="retro-blog">
+    <Content components={mdxComponents} />
+  </article>
+
+  <AsciiRule />
+  {(prev || next) && <nav class="retro-nav" aria-label="More posts">
+    {prev ? <a href={`/blog/${prev.id}`}><small>&lt;- older</small>{prev.data.title}</a> : <span />}
+    {next ? <a class="next" href={`/blog/${next.id}`}><small>newer -&gt;</small>{next.data.title}</a> : <span />}
+  </nav>}
+  <p class="retro-back" style="margin-top:1.5rem"><a href="/blog">&lt;- back to /blog</a></p>
+</BlogLayout>

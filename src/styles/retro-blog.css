@@ -1,0 +1,228 @@
+/* Retro "old-web journal" styling for the Blog.
+ *
+ * CONTRACT: post bodies render as <article class="retro-blog"> ...markdown... </article>.
+ * All body styling lives under `.retro-blog`. Palette variables are defined on
+ * `.retro-scope, .retro-blog` and switch with `.dark` on <html> (or on any ancestor).
+ * Page chrome (index/header/nav) uses `.retro-*` classes in this same file.
+ */
+
+.retro-scope,
+.retro-blog {
+  --r-paper: #f6efdc;
+  --r-paper-2: #ece3ca;
+  --r-ink: #2b2118;
+  --r-muted: #5f5241;
+  --r-rule: #b9a984;
+  --r-accent: #9a3412;
+  --r-mark: #fde9a8;
+  --r-code-bg: #ebe1c6;
+  --r-font-body: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+  --r-font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.dark .retro-scope,
+.dark .retro-blog,
+.retro-scope[data-theme='dark'],
+.retro-blog[data-theme='dark'] {
+  --r-paper: #0c0b07;
+  --r-paper-2: #15130b;
+  --r-ink: #f0c36a;
+  --r-muted: #b8913f;
+  --r-rule: #5c4a20;
+  --r-accent: #ffd98a;
+  --r-mark: #4a3a10;
+  --r-code-bg: #17140b;
+}
+
+/* ---------- page shell ---------- */
+.retro-paper {
+  position: relative;
+  background: var(--r-paper);
+  color: var(--r-ink);
+  font-family: var(--r-font-body);
+  border: 1px dashed var(--r-rule);
+  border-radius: 4px;
+  padding: 1.5rem 1.1rem 2rem;
+  box-shadow: 4px 4px 0 var(--r-rule);
+}
+@media (min-width: 640px) {
+  .retro-paper { padding: 2.25rem 2.75rem 3rem; }
+}
+.dark .retro-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.22) 2px 3px);
+}
+.dark .retro-paper { text-shadow: 0 0 6px rgb(255 190 80 / 0.18); }
+.retro-paper > * { position: relative; }
+.retro-inner { max-width: 44rem; margin-inline: auto; }
+
+.retro-mono { font-family: var(--r-font-mono); }
+.retro-muted { color: var(--r-muted); }
+.retro-ascii {
+  font-family: var(--r-font-mono);
+  color: var(--r-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  white-space: pre;
+  overflow: hidden;
+  user-select: none;
+}
+
+.retro-paper a { color: var(--r-accent); text-underline-offset: 3px; }
+.retro-paper a:hover { background: var(--r-ink); color: var(--r-paper); text-decoration: none; }
+.retro-paper a:focus-visible, .retro-paper input:focus-visible {
+  outline: 2px dashed var(--r-accent); outline-offset: 2px;
+}
+
+.retro-cursor {
+  display: inline-block;
+  width: 0.6em; height: 1.05em;
+  vertical-align: text-bottom;
+  background: var(--r-ink);
+  margin-left: 0.15em;
+  animation: retro-blink 1.1s steps(1) infinite;
+}
+@keyframes retro-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .retro-cursor { animation: none; }
+}
+
+.retro-title {
+  font-family: var(--r-font-mono);
+  font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0.4rem 0 0.6rem;
+  color: var(--r-ink);
+}
+.retro-meta {
+  font-family: var(--r-font-mono);
+  font-size: 0.82rem;
+  color: var(--r-muted);
+  display: flex; flex-wrap: wrap; gap: 0.25rem 1rem;
+}
+.retro-tag { color: var(--r-muted); }
+.retro-tag::before { content: '#'; }
+
+/* ---------- index list ---------- */
+.retro-search {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--r-font-mono); font-size: 0.9rem;
+  border-bottom: 1px dotted var(--r-rule);
+  padding: 0.4rem 0;
+  margin: 1.25rem 0 0.5rem;
+}
+.retro-search input {
+  flex: 1; min-width: 0; background: transparent; border: 0; color: var(--r-ink);
+  font: inherit; padding: 0.2rem 0;
+}
+.retro-search input::placeholder { color: var(--r-muted); }
+.retro-list { list-style: none; margin: 0; padding: 0; }
+.retro-entry { padding: 1.1rem 0; border-bottom: 1px dashed var(--r-rule); }
+.retro-entry:last-child { border-bottom: 0; }
+.retro-entry[hidden] { display: none; }
+.retro-entry-date { font-family: var(--r-font-mono); font-size: 0.82rem; color: var(--r-muted); }
+.retro-entry h2 {
+  font-family: var(--r-font-mono); font-size: 1.2rem; line-height: 1.3; margin: 0.15rem 0 0.35rem; font-weight: 700;
+}
+.retro-entry h2 a { text-decoration: none; color: var(--r-ink); }
+.retro-entry h2 a::before { content: '> '; color: var(--r-accent); }
+.retro-entry h2 a:hover { background: var(--r-ink); color: var(--r-paper); }
+.retro-entry p { margin: 0 0 0.45rem; line-height: 1.6; color: var(--r-ink); }
+
+.retro-nav {
+  display: grid; gap: 0.75rem; margin-top: 2rem;
+  font-family: var(--r-font-mono); font-size: 0.9rem;
+  border-top: 1px dashed var(--r-rule); padding-top: 1.25rem;
+}
+@media (min-width: 640px) { .retro-nav { grid-template-columns: 1fr 1fr; } .retro-nav .next { text-align: right; } }
+.retro-nav small { display: block; color: var(--r-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.retro-back { font-family: var(--r-font-mono); font-size: 0.85rem; }
+
+/* ---------- post body: .retro-blog ---------- */
+.retro-blog {
+  font-family: var(--r-font-body);
+  color: var(--r-ink);
+  font-size: 1.075rem;
+  line-height: 1.75;
+  max-width: 68ch;
+  overflow-wrap: break-word;
+}
+.retro-blog > :first-child { margin-top: 0; }
+.retro-blog p { margin: 0 0 1.3em; }
+.retro-blog h1, .retro-blog h2, .retro-blog h3, .retro-blog h4, .retro-blog h5, .retro-blog h6 {
+  font-family: var(--r-font-mono);
+  color: var(--r-ink);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  margin: 2.2em 0 0.7em;
+  scroll-margin-top: 6rem;
+}
+.retro-blog h1 { font-size: 1.6rem; }
+.retro-blog h2 { font-size: 1.3rem; }
+.retro-blog h3 { font-size: 1.12rem; }
+.retro-blog h4, .retro-blog h5, .retro-blog h6 { font-size: 1rem; }
+.retro-blog h1::before, .retro-blog h2::before { content: '## '; color: var(--r-accent); font-weight: 400; }
+.retro-blog h3::before { content: '### '; color: var(--r-accent); font-weight: 400; }
+.retro-blog a { color: var(--r-accent); text-decoration: underline dotted; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+.retro-blog a:hover { background: var(--r-ink); color: var(--r-paper); text-decoration: none; }
+.retro-blog strong { font-weight: 700; }
+.retro-blog em { font-style: italic; }
+.retro-blog mark { background: var(--r-mark); color: var(--r-ink); padding: 0 0.15em; }
+.retro-blog ul, .retro-blog ol { margin: 0 0 1.3em; padding-left: 1.6em; }
+.retro-blog ul { list-style: none; }
+.retro-blog ol { list-style: decimal; }
+.retro-blog ul > li { position: relative; }
+.retro-blog ul > li::before {
+  content: '*'; position: absolute; left: -1.25em; color: var(--r-accent); font-family: var(--r-font-mono); font-weight: 700;
+}
+.retro-blog ol > li::marker { font-family: var(--r-font-mono); color: var(--r-accent); }
+.retro-blog li { margin: 0.35em 0; }
+.retro-blog li > p { margin-bottom: 0.5em; }
+.retro-blog blockquote {
+  margin: 1.6em 0; padding: 0.4em 1em;
+  border-left: 3px double var(--r-rule);
+  font-style: italic; color: var(--r-ink);
+  background: var(--r-paper-2);
+}
+.retro-blog blockquote p:last-child { margin-bottom: 0; }
+.retro-blog blockquote p::before { content: '"'; color: var(--r-accent); }
+.retro-blog blockquote p:last-child::after { content: '"'; color: var(--r-accent); }
+.retro-blog code {
+  font-family: var(--r-font-mono); font-size: 0.86em;
+  background: var(--r-code-bg); border: 1px dotted var(--r-rule);
+  padding: 0.1em 0.35em; border-radius: 2px;
+}
+.retro-blog pre {
+  font-family: var(--r-font-mono); font-size: 0.85rem; line-height: 1.6;
+  background: var(--r-code-bg); border: 1px dashed var(--r-rule);
+  padding: 1em 1.1em; overflow-x: auto; margin: 1.5em 0;
+}
+.retro-blog pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+.retro-blog hr {
+  border: 0; height: auto; margin: 2.5em 0; text-align: center; overflow: hidden;
+  color: var(--r-muted); font-family: var(--r-font-mono); line-height: 1; white-space: nowrap;
+}
+.retro-blog hr::before { content: '+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +'; }
+.retro-blog img {
+  display: block; max-width: 100%; height: auto; margin: 1.6em 0 0.4em;
+  border: 1px solid var(--r-rule); padding: 5px; background: var(--r-paper-2);
+}
+.retro-blog img[data-zoomable] { cursor: zoom-in; }
+.retro-blog figure { margin: 1.6em 0; }
+.retro-blog figure img { margin: 0 0 0.4em; }
+.retro-blog figcaption {
+  font-family: var(--r-font-mono); font-size: 0.78rem; color: var(--r-muted);
+}
+.retro-blog figcaption::before { content: 'fig. '; }
+.retro-blog table { border-collapse: collapse; width: 100%; font-family: var(--r-font-mono); font-size: 0.85rem; margin: 1.5em 0; display: block; overflow-x: auto; }
+.retro-blog th, .retro-blog td { border: 1px dashed var(--r-rule); padding: 0.4em 0.7em; text-align: left; }
+.retro-blog th { background: var(--r-paper-2); }
+.retro-blog input[type='checkbox'] { accent-color: var(--r-accent); margin-right: 0.4em; }
+.retro-blog li:has(> input[type='checkbox']) { list-style: none; }
+.retro-blog li:has(> input[type='checkbox'])::before { content: none; }

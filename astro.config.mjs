@@ -8,6 +8,7 @@ import expressiveCode from 'astro-expressive-code';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { unified } from '@astrojs/markdown-remark';
+import blogadmin from './src/integrations/blogadmin.ts';
 
 // https://astro.build/config
 export default defineConfig({
@@ -61,6 +62,7 @@ export default defineConfig({
     }),
     mdx(),
     react(),
+    blogadmin(), // dev-only: injects nothing in `astro build`
     sitemap({
       filter: (page) => !page.includes('/admin'),
     }),

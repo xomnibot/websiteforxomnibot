@@ -34,7 +34,7 @@ export const collectionMeta: Record<
   blog: {
     label: 'Blog',
     singular: 'Post',
-    description: 'Notes on study methods, career, and the craft of security research.',
+    description: 'A personal corner: thoughts, notes and whatever is on my mind.',
     href: '/blog',
     eyebrow: '// blog',
   },
