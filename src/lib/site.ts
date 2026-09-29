@@ -48,7 +48,6 @@ export const siteConfig = {
     linkedin: 'https://linkedin.com/in/xomnibot',
     x: 'https://x.com/xomnibot',
     email: 'contact@xomnibot.in',
-    gpg: 'https://xomnibot.in/gpg-key.asc',
   },
 
   currentFocus: {

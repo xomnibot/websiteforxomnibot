@@ -96,13 +96,13 @@ function staticPageEntries(): SearchEntry[] {
     },
     {
       title: 'Contact',
-      description: `Get in touch with ${siteConfig.persona.handle} — email, GitHub, LinkedIn, X, GPG key.`,
+      description: `Get in touch with ${siteConfig.persona.handle} — email, GitHub, LinkedIn, X.`,
       href: '/contact',
       collection: 'page',
       tags: [],
       date: buildDate,
       headings: [],
-      text: `Contact email GitHub LinkedIn X Twitter GPG key ${siteConfig.socials.email} ${siteConfig.socials.github} ${siteConfig.socials.linkedin} ${siteConfig.socials.x}`,
+      text: `Contact email GitHub LinkedIn X Twitter ${siteConfig.socials.email} ${siteConfig.socials.github} ${siteConfig.socials.linkedin} ${siteConfig.socials.x}`,
     },
     {
       title: 'YouTube',

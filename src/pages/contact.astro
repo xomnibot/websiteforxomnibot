@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button.astro';
 import BrandIcon from '@/components/ui/BrandIcon.astro';
 import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
 import { siteConfig } from '@/lib/site';
-import { Mail, Copy, KeyRound, ShieldAlert, Clock } from '@lucide/astro';
+import { Mail, Copy, ShieldAlert, Clock } from '@lucide/astro';
 
 const socialLinks = [
   { href: siteConfig.socials.github, label: 'GitHub', hint: '@xomnibot', brand: 'github' as const },
@@ -26,7 +26,7 @@ const socialLinks = [
   </Container>
 
   <Container class="pb-16 sm:pb-24">
-    <div class="grid gap-4 lg:grid-cols-2">
+    <div class="grid gap-4">
       <!-- Email -->
       <div class="rounded-xl border border-line bg-elevated p-5 sm:p-6">
         <p class="font-mono text-xs uppercase tracking-widest text-accent">// email</p>
@@ -55,22 +55,6 @@ const socialLinks = [
         </div>
       </div>
 
-      <!-- GPG -->
-      <div class="rounded-xl border border-line bg-elevated p-5 sm:p-6">
-        <p class="font-mono text-xs uppercase tracking-widest text-accent">// encrypt</p>
-        <div class="mt-3 flex flex-wrap items-center gap-3">
-          <span class="inline-flex size-10 items-center justify-center rounded-lg border border-line bg-surface text-accent">
-            <KeyRound class="size-4" />
-          </span>
-          <p class="text-sm text-muted">Prefer encrypted mail? Grab the public GPG key.</p>
-        </div>
-        <div class="mt-4">
-          <Button href={siteConfig.socials.gpg} target="_blank" rel="noreferrer" variant="secondary" size="sm">
-            <KeyRound class="size-3.5" />
-            Download GPG key
-          </Button>
-        </div>
-      </div>
     </div>
 
     <!-- Socials -->
@@ -115,8 +99,7 @@ const socialLinks = [
         <li class="flex items-start gap-2">
           <span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent"></span>
           Email a clear description of the issue, affected component, and reproduction steps to
-          <span class="font-mono text-fg">{siteConfig.socials.email}</span> — encrypt with the GPG key above if the
-          finding is sensitive.
+          <span class="font-mono text-fg">{siteConfig.socials.email}</span>.
         </li>
         <li class="flex items-start gap-2">
           <span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent"></span>
