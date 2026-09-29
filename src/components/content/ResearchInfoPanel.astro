@@ -1,0 +1,81 @@
+---
+/** Research-specific panel: CVE, severity, CVSS meter, impact, affected systems. */
+import InfoPanelShell from './InfoPanelShell.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { severityTone } from '@/lib/badges';
+import { ShieldAlert, Gauge, Activity, Globe } from '@lucide/astro';
+import type { AnyEntry } from '@/lib/collections';
+
+type ResearchData = Extract<AnyEntry, { collection: 'research' }>['data'];
+
+interface Props {
+  data: ResearchData;
+}
+
+const { data } = Astro.props;
+const hasContent = Boolean(
+  data.cve || data.severity || typeof data.cvss === 'number' || data.impact || data.affectedSystems,
+);
+
+// Literal class strings (not template-interpolated) so Tailwind's static
+// scanner can see and generate them.
+const cvssBarClass =
+  typeof data.cvss === 'number'
+    ? data.cvss >= 9
+      ? 'bg-red'
+      : data.cvss >= 7
+        ? 'bg-orange'
+        : data.cvss >= 4
+          ? 'bg-amber'
+          : 'bg-green'
+    : 'bg-muted';
+const cvssPercent = typeof data.cvss === 'number' ? Math.min(100, Math.max(0, (data.cvss / 10) * 100)) : 0;
+---
+
+{hasContent && (
+  <InfoPanelShell title="Vulnerability Details" icon={ShieldAlert}>
+    <dl class="grid gap-5 sm:grid-cols-2">
+      {data.cve && (
+        <div>
+          <dt class="mb-1 text-xs uppercase tracking-wide text-subtle">CVE ID</dt>
+          <dd class="font-mono text-sm font-medium text-fg">{data.cve}</dd>
+        </div>
+      )}
+      {data.severity && (
+        <div>
+          <dt class="mb-1 text-xs uppercase tracking-wide text-subtle">Severity</dt>
+          <dd><Badge tone={severityTone(data.severity)}>{data.severity}</Badge></dd>
+        </div>
+      )}
+      {typeof data.cvss === 'number' && (
+        <div class="sm:col-span-2">
+          <dt class="mb-1.5 flex items-center gap-1.5 text-xs uppercase tracking-wide text-subtle">
+            <Gauge class="size-3.5" /> CVSS Score
+          </dt>
+          <dd class="flex items-center gap-3">
+            <div class="h-2 flex-1 overflow-hidden rounded-full bg-surface">
+              <div class={`h-full rounded-full ${cvssBarClass}`} style={`width: ${cvssPercent}%`}></div>
+            </div>
+            <span class="font-mono text-sm font-medium text-fg">{data.cvss.toFixed(1)} / 10</span>
+          </dd>
+        </div>
+      )}
+      {data.impact && (
+        <div class="sm:col-span-2">
+          <dt class="mb-1 flex items-center gap-1.5 text-xs uppercase tracking-wide text-subtle">
+            <Activity class="size-3.5" /> Impact
+          </dt>
+          <dd class="text-sm text-muted">{data.impact}</dd>
+        </div>
+      )}
+      {data.affectedSystems && (
+        <div class="sm:col-span-2">
+          <dt class="mb-1 flex items-center gap-1.5 text-xs uppercase tracking-wide text-subtle">
+            <Globe class="size-3.5" /> Affected Systems
+          </dt>
+          <dd class="text-sm text-muted">{data.affectedSystems}</dd>
+        </div>
+      )}
+    </dl>
+  </InfoPanelShell>
+)}

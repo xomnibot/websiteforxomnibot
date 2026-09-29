@@ -1,0 +1,107 @@
+---
+/** Project-specific panel: repo/demo/docs buttons, language/license/stars/status, features, install. */
+import InfoPanelShell from './InfoPanelShell.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import BrandIcon from '@/components/ui/BrandIcon.astro';
+import CopyButton from './CopyButton.astro';
+import { statusTone } from '@/lib/badges';
+import { ExternalLink, BookOpen, Star, Scale, Package } from '@lucide/astro';
+import type { AnyEntry } from '@/lib/collections';
+
+type ProjectData = Extract<AnyEntry, { collection: 'projects' }>['data'];
+
+interface Props {
+  data: ProjectData;
+}
+
+const { data } = Astro.props;
+const hasLinks = Boolean(data.repo || data.demo || data.docs);
+const hasMeta = Boolean(data.language || data.license || typeof data.stars === 'number');
+const hasContent = hasLinks || hasMeta || data.features.length > 0 || data.install.length > 0;
+---
+
+{hasContent && (
+  <InfoPanelShell title="Project Details" icon={Package}>
+    <div class="space-y-5">
+      {hasLinks && (
+        <div class="flex flex-wrap gap-2">
+          {data.repo && (
+            <Button href={data.repo} variant="primary" size="sm" target="_blank" rel="noreferrer">
+              <BrandIcon name="github" class="size-4" /> Repository
+            </Button>
+          )}
+          {data.demo && (
+            <Button href={data.demo} variant="secondary" size="sm" target="_blank" rel="noreferrer">
+              <ExternalLink class="size-4" /> Live demo
+            </Button>
+          )}
+          {data.docs && (
+            <Button href={data.docs} variant="secondary" size="sm" target="_blank" rel="noreferrer">
+              <BookOpen class="size-4" /> Docs
+            </Button>
+          )}
+        </div>
+      )}
+
+      {hasMeta && (
+        <dl class="flex flex-wrap gap-x-6 gap-y-3 text-sm">
+          {data.language && (
+            <div>
+              <dt class="text-xs uppercase tracking-wide text-subtle">Language</dt>
+              <dd class="font-medium text-fg">{data.language}</dd>
+            </div>
+          )}
+          {data.license && (
+            <div>
+              <dt class="flex items-center gap-1 text-xs uppercase tracking-wide text-subtle">
+                <Scale class="size-3.5" /> License
+              </dt>
+              <dd class="font-medium text-fg">{data.license}</dd>
+            </div>
+          )}
+          {typeof data.stars === 'number' && (
+            <div>
+              <dt class="flex items-center gap-1 text-xs uppercase tracking-wide text-subtle">
+                <Star class="size-3.5" /> Stars
+              </dt>
+              <dd class="font-medium text-fg">{data.stars.toLocaleString()}</dd>
+            </div>
+          )}
+          <div>
+            <dt class="text-xs uppercase tracking-wide text-subtle">Status</dt>
+            <dd><Badge tone={statusTone(data.status)}>{data.status}</Badge></dd>
+          </div>
+        </dl>
+      )}
+
+      {data.features.length > 0 && (
+        <div>
+          <p class="mb-2 text-xs uppercase tracking-wide text-subtle">Features</p>
+          <ul class="space-y-1.5 text-sm text-muted">
+            {data.features.map((f) => (
+              <li class="flex gap-2">
+                <span class="text-accent" aria-hidden="true">›</span>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {data.install.length > 0 && (
+        <div>
+          <p class="mb-2 text-xs uppercase tracking-wide text-subtle">Install</p>
+          <div class="space-y-1.5">
+            {data.install.map((cmd) => (
+              <div class="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-3 py-2">
+                <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-sm text-fg">{cmd}</code>
+                <CopyButton text={cmd} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </InfoPanelShell>
+)}

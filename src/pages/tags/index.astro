@@ -1,0 +1,51 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
+import { getAllTags } from '@/lib/collections';
+import { Hash } from '@lucide/astro';
+
+const tags = await getAllTags();
+const maxCount = Math.max(1, ...tags.map((t) => t.count));
+
+function sizeClass(count: number): string {
+  const ratio = count / maxCount;
+  if (ratio > 0.75) return 'text-lg';
+  if (ratio > 0.5) return 'text-base';
+  if (ratio > 0.25) return 'text-sm';
+  return 'text-xs';
+}
+---
+
+<BaseLayout title="Tags" description="Browse every writeup, research post, project, and article by tag.">
+  <Container class="space-y-8 py-12 sm:py-16">
+    <div class="space-y-4">
+      <TerminalPrompt path="~/tags" />
+      <SectionHeading
+        eyebrow="// tags"
+        title="Tags"
+        description="Every topic covered across writeups, research, projects, and the blog."
+      />
+      <p class="font-mono text-xs text-subtle">{tags.length} tags</p>
+    </div>
+
+    {tags.length === 0 ? (
+      <p class="text-muted">No tags yet.</p>
+    ) : (
+      <div class="flex flex-wrap gap-3">
+        {tags.map((t) => (
+          <a
+            href={`/tags/${t.slug}`}
+            data-spotlight
+            class={`inline-flex items-center gap-1.5 rounded-lg border border-line bg-elevated px-3 py-1.5 font-mono text-muted transition-colors hover:border-accent/40 hover:text-accent ${sizeClass(t.count)}`}
+          >
+            <Hash class="size-3.5" />
+            {t.tag}
+            <span class="text-subtle">({t.count})</span>
+          </a>
+        ))}
+      </div>
+    )}
+  </Container>
+</BaseLayout>

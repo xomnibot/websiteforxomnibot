@@ -1,0 +1,83 @@
+---
+/**
+ * Table of contents from `headings` (depth 2-3), rendered twice by
+ * PostLayout: once inside a mobile <details> and once as a desktop sticky
+ * sidebar. The scrollspy script below queries ALL [data-toc-link] elements
+ * on the page (both variants share slugs) so both stay in sync, and runs
+ * once at module scope + again on every astro:page-load (per FOUNDATION
+ * pattern #5) since the headings differ per article.
+ */
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+  variant?: 'desktop' | 'mobile';
+}
+
+const { headings, variant = 'desktop' } = Astro.props;
+
+/**
+ * `render()`'s heading text currently has a trailing "#" bled in from
+ * rehype-autolink-headings' appended anchor glyph (the anchor's text
+ * content gets swept into the heading's plain-text extraction). Strip only
+ * a *trailing* run of "#" so legitimate mid-text "#" (e.g. "Ingredient #1")
+ * is left untouched.
+ */
+function cleanHeadingText(text: string): string {
+  return text.replace(/#+\s*$/, '').trim();
+}
+---
+
+<nav aria-label="On this page" data-toc class={variant === 'desktop' ? '' : 'mt-3 border-t border-line pt-3'}>
+  {variant === 'desktop' && <p class="mb-2 font-mono text-xs uppercase tracking-widest text-subtle">On this page</p>}
+  <ul class="space-y-0.5 text-sm">
+    {headings.map((h) => (
+      <li style={`padding-left: ${(h.depth - 2) * 0.75}rem`}>
+        <a
+          href={`#${h.slug}`}
+          data-toc-link={h.slug}
+          class="block truncate border-l border-transparent py-1 pl-3 text-muted transition-colors hover:text-fg data-[active=true]:border-accent data-[active=true]:text-accent"
+        >
+          {cleanHeadingText(h.text)}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<script>
+  function initToc() {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+    if (!links.length) return;
+
+    const targets = links
+      .map((link) => document.getElementById(link.dataset.tocLink ?? ''))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!targets.length) return;
+
+    function setActive(slug: string) {
+      document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]').forEach((link) => {
+        link.dataset.active = String(link.dataset.tocLink === slug);
+      });
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const top = visible[0];
+        if (top?.target.id) setActive(top.target.id);
+      },
+      { rootMargin: '-96px 0px -70% 0px', threshold: 0 },
+    );
+    targets.forEach((t) => observer.observe(t));
+  }
+
+  initToc();
+  document.addEventListener('astro:page-load', initToc);
+</script>

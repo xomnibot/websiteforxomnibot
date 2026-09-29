@@ -1,0 +1,49 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
+import PostCard from '@/components/content/PostCard.astro';
+import { getAllTags, getAllPublished } from '@/lib/collections';
+import { slugify } from '@/lib/utils';
+
+export async function getStaticPaths() {
+  const tags = await getAllTags();
+  const all = await getAllPublished();
+  return tags.map((t) => ({
+    params: { tag: t.slug },
+    props: {
+      tag: t.tag,
+      entries: all.filter((e) => e.data.tags.some((tag) => slugify(tag) === t.slug)),
+    },
+  }));
+}
+
+interface Props {
+  tag: string;
+  entries: Awaited<ReturnType<typeof getAllPublished>>;
+}
+
+const { tag, entries } = Astro.props;
+const description = `${entries.length} post${entries.length === 1 ? '' : 's'} tagged "${tag}".`;
+---
+
+<BaseLayout title={`#${tag}`} description={description}>
+  <Container class="space-y-8 py-12 sm:py-16">
+    <div class="space-y-4">
+      <TerminalPrompt path={`~/tags/${slugify(tag)}`} />
+      <SectionHeading
+        eyebrow="// tags"
+        title={`#${tag}`}
+        description={description}
+        action={{ label: 'All tags', href: '/tags' }}
+      />
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {entries.map((entry) => (
+        <PostCard entry={entry} showCollectionBadge />
+      ))}
+    </div>
+  </Container>
+</BaseLayout>

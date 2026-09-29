@@ -1,0 +1,44 @@
+---
+/**
+ * "No posts match" state. Hidden by default (FilterBar's script toggles
+ * `hidden` based on the live filtered count); pass `hidden={false}` for a
+ * static empty state (e.g. a collection with zero published entries yet).
+ * The button carries `data-filter-clear` so FilterBar wires it up alongside
+ * its own clear button automatically.
+ */
+import { SearchX } from '@lucide/astro';
+
+interface Props {
+  message?: string;
+  hint?: string;
+  hidden?: boolean;
+  /** Hide the "Clear filters" button — set false when there's no FilterBar on the page. */
+  showClearButton?: boolean;
+}
+
+const {
+  message = 'No posts match your filters.',
+  hint = 'Try a different search term or clear the filters below.',
+  hidden = true,
+  showClearButton = true,
+} = Astro.props;
+---
+
+<div
+  data-empty-state
+  hidden={hidden}
+  class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-line bg-elevated/50 px-6 py-16 text-center"
+>
+  <SearchX class="size-8 text-subtle" aria-hidden="true" />
+  <p class="font-medium text-fg">{message}</p>
+  <p class="max-w-sm text-sm text-muted">{hint}</p>
+  {showClearButton && (
+    <button
+      type="button"
+      data-filter-clear
+      class="mt-2 inline-flex items-center rounded-lg border border-line-strong px-3.5 py-1.5 text-sm text-fg transition-colors hover:border-accent/50 hover:text-accent"
+    >
+      Clear filters
+    </button>
+  )}
+</div>

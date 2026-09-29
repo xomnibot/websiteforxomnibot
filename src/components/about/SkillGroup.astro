@@ -1,0 +1,27 @@
+---
+/** Tasteful chip group for one skill category on /about. */
+interface Props {
+  label: string;
+  icon: any;
+  skills: readonly string[];
+  class?: string;
+}
+
+const { label, icon: Icon, skills, class: className = '' } = Astro.props;
+---
+
+<div class={`rounded-xl border border-line bg-elevated p-5 ${className}`}>
+  <div class="flex items-center gap-2">
+    <span class="inline-flex size-8 items-center justify-center rounded-lg border border-line bg-surface text-accent">
+      <Icon class="size-4" />
+    </span>
+    <h3 class="font-semibold text-fg">{label}</h3>
+  </div>
+  <div class="mt-4 flex flex-wrap gap-2">
+    {
+      skills.map((skill) => (
+        <span class="rounded-md border border-line bg-surface px-2.5 py-1 font-mono text-xs text-muted">{skill}</span>
+      ))
+    }
+  </div>
+</div>

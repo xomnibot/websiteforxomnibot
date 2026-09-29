@@ -1,0 +1,57 @@
+---
+/**
+ * Copy-to-clipboard button. Pass `text` to copy a fixed string (cheatsheet
+ * commands, install commands); omit it to copy the current page URL
+ * (post-footer "copy link"). The click handler is delegated on `document`
+ * and registered exactly ONCE at module scope (never re-bound, works for
+ * every button on every page forever, per FOUNDATION pattern #4).
+ */
+import { Copy, Check } from '@lucide/astro';
+
+interface Props {
+  text?: string;
+  label?: string;
+  class?: string;
+}
+
+const { text, label = 'Copy', class: className } = Astro.props;
+
+const defaultClass =
+  'inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/40 hover:text-fg';
+---
+
+<button type="button" data-copy-button data-copy-text={text} class={className ?? defaultClass}>
+  <span data-copy-icon-default class="inline-flex items-center gap-1.5">
+    <Copy class="size-3.5" />
+    {label}
+  </span>
+  <span data-copy-icon-done hidden class="inline-flex items-center gap-1.5 text-accent">
+    <Check class="size-3.5" />
+    Copied
+  </span>
+</button>
+
+<script>
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const button = target.closest<HTMLElement>('[data-copy-button]');
+    if (!button) return;
+
+    const text = button.dataset.copyText ?? window.location.href;
+    navigator.clipboard
+      ?.writeText(text)
+      .then(() => {
+        const before = button.querySelector<HTMLElement>('[data-copy-icon-default]');
+        const after = button.querySelector<HTMLElement>('[data-copy-icon-done]');
+        if (!before || !after) return;
+        before.hidden = true;
+        after.hidden = false;
+        window.setTimeout(() => {
+          before.hidden = false;
+          after.hidden = true;
+        }, 1600);
+      })
+      .catch(() => {});
+  });
+</script>

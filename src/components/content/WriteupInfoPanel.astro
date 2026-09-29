@@ -1,0 +1,65 @@
+---
+/** Writeup-specific panel: objectives, prerequisites, tools. Only rendered fields shown. */
+import InfoPanelShell from './InfoPanelShell.astro';
+import { Terminal, Target, ListChecks, Wrench } from '@lucide/astro';
+import type { AnyEntry } from '@/lib/collections';
+
+type WriteupData = Extract<AnyEntry, { collection: 'writeups' }>['data'];
+
+interface Props {
+  data: WriteupData;
+}
+
+const { data } = Astro.props;
+const hasContent = data.objectives.length > 0 || data.prerequisites.length > 0 || data.tools.length > 0;
+---
+
+{hasContent && (
+  <InfoPanelShell title="Lab Details" icon={Terminal}>
+    <dl class="grid gap-5 sm:grid-cols-2">
+      {data.objectives.length > 0 && (
+        <div class="sm:col-span-2">
+          <dt class="mb-2 flex items-center gap-1.5 text-sm font-medium text-fg">
+            <Target class="size-4 text-accent" /> Objectives
+          </dt>
+          <dd>
+            <ul class="space-y-1.5 text-sm text-muted">
+              {data.objectives.map((o) => (
+                <li class="flex gap-2">
+                  <span class="text-accent" aria-hidden="true">›</span>
+                  {o}
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      )}
+
+      {data.prerequisites.length > 0 && (
+        <div>
+          <dt class="mb-2 flex items-center gap-1.5 text-sm font-medium text-fg">
+            <ListChecks class="size-4 text-accent" /> Prerequisites
+          </dt>
+          <dd class="flex flex-wrap gap-1.5">
+            {data.prerequisites.map((p) => (
+              <span class="rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-xs text-muted">{p}</span>
+            ))}
+          </dd>
+        </div>
+      )}
+
+      {data.tools.length > 0 && (
+        <div>
+          <dt class="mb-2 flex items-center gap-1.5 text-sm font-medium text-fg">
+            <Wrench class="size-4 text-accent" /> Tools
+          </dt>
+          <dd class="flex flex-wrap gap-1.5">
+            {data.tools.map((t) => (
+              <span class="rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-xs text-muted">{t}</span>
+            ))}
+          </dd>
+        </div>
+      )}
+    </dl>
+  </InfoPanelShell>
+)}

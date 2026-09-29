@@ -1,0 +1,14 @@
+---
+/**
+ * /admin — owner-only publishing UI. A React island that talks directly to
+ * the GitHub REST API from the browser (fine-grained PAT in localStorage).
+ * Not linked in nav, noindex, excluded from the sitemap (see
+ * astro.config.mjs's sitemap filter).
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import AdminApp from '@/components/admin/AdminApp';
+---
+
+<BaseLayout title="Admin" description="Publish new content to xomnibot.in." noindex>
+  <AdminApp client:only="react" />
+</BaseLayout>

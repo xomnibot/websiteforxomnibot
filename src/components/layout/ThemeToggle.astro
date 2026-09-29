@@ -1,0 +1,18 @@
+---
+/**
+ * Relies on `window.__setTheme(theme)`, defined once by the no-flash theme
+ * script in BaseLayout's <head>. Since it's a global on `window`, it keeps
+ * working across Astro view transitions with no re-init needed.
+ */
+import { Sun, Moon } from '@lucide/astro';
+---
+
+<button
+  type="button"
+  onclick="window.__setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark')"
+  aria-label="Toggle color theme"
+  class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-line text-muted transition-colors hover:border-accent/40 hover:text-accent"
+>
+  <Sun class="size-4 dark:hidden" />
+  <Moon class="hidden size-4 dark:block" />
+</button>

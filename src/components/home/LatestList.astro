@@ -1,0 +1,65 @@
+---
+/** Compact "latest N" list for a single collection, used on the home page. */
+import type { AnyEntry } from '@/lib/collections';
+import { entryHref, entryReadingTime } from '@/lib/collections';
+import { formatDate } from '@/lib/utils';
+import { difficultyTone, severityTone } from '@/lib/badges';
+import Badge from '@/components/ui/Badge.astro';
+import { ArrowRight } from '@lucide/astro';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  href: string;
+  entries: AnyEntry[];
+  class?: string;
+}
+
+const { eyebrow, title, href, entries, class: className = '' } = Astro.props;
+---
+
+<div class={`rounded-xl border border-line bg-elevated p-5 ${className}`}>
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <p class="font-mono text-xs uppercase tracking-widest text-accent">{eyebrow}</p>
+      <h3 class="mt-1 text-lg font-semibold tracking-tight text-fg">{title}</h3>
+    </div>
+    <a href={href} class="group inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent underline-offset-4 hover:underline">
+      View all
+      <ArrowRight class="size-3.5 transition-transform group-hover:translate-x-0.5" />
+    </a>
+  </div>
+
+  {
+    entries.length === 0 ? (
+      <p class="mt-4 text-sm text-subtle">Nothing published here yet — check back soon.</p>
+    ) : (
+      <ul class="mt-4 divide-y divide-line">
+        {entries.map((entry) => (
+          <li>
+            <a href={entryHref(entry)} class="group flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+              <div class="min-w-0">
+                <p class="truncate text-sm font-medium text-fg group-hover:text-accent">{entry.data.title}</p>
+                <p class="mt-1 flex items-center gap-2 font-mono text-[0.6875rem] text-subtle">
+                  <time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time>
+                  <span aria-hidden="true">&middot;</span>
+                  <span>{entryReadingTime(entry)}</span>
+                </p>
+              </div>
+              {entry.collection === 'writeups' && entry.data.difficulty && (
+                <Badge tone={difficultyTone(entry.data.difficulty)} class="shrink-0">
+                  {entry.data.difficulty}
+                </Badge>
+              )}
+              {entry.collection === 'research' && entry.data.severity && (
+                <Badge tone={severityTone(entry.data.severity)} class="shrink-0">
+                  {entry.data.severity}
+                </Badge>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>

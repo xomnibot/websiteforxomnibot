@@ -1,0 +1,67 @@
+# build output
+dist/
+.astro/
+.output/
+
+# dependencies
+node_modules/
+
+# environment variables (never commit real secrets — keep .env.example only)
+.env
+.env.*
+*.local
+!.env.example
+
+# secrets & credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+id_ed25519*
+*.gpg
+secrets.*
+credentials.*
+*.secret
+*.token
+.npmrc
+.netrc
+
+# deploy platforms
+.vercel/
+.netlify/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# caches
+.cache/
+.eslintcache
+*.tsbuildinfo
+coverage/
+
+# local backups / archives
+*.tar.gz
+*.bundle
+*.bak
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# temporary local build dirs
+.build*/
+.tmp*/

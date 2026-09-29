@@ -1,0 +1,56 @@
+---
+/** Video card for /youtube (and reusable on the home page later). Clicking
+ * the play button swaps the thumbnail for a lazy youtube-nocookie iframe —
+ * handled by a single delegated click listener the page registers once. */
+import type { YouTubeVideo } from '@/data/youtube';
+import { formatDate } from '@/lib/utils';
+import Badge from '@/components/ui/Badge.astro';
+import { Play } from '@lucide/astro';
+
+interface Props {
+  video: YouTubeVideo;
+  class?: string;
+}
+
+const { video, class: className = '' } = Astro.props;
+---
+
+<article
+  data-yt-card
+  data-video-id={video.videoId}
+  data-video-title={video.title}
+  class={`group overflow-hidden rounded-xl border border-line bg-elevated transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 ${className}`}
+>
+  <div class="relative aspect-video overflow-hidden border-b border-line bg-surface" data-yt-media>
+    <img
+      src={video.thumbnailUrl}
+      alt={video.title}
+      loading="lazy"
+      class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+    />
+    <button
+      type="button"
+      data-yt-play
+      aria-label={`Play ${video.title}`}
+      class="absolute inset-0 flex items-center justify-center bg-bg/20 opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
+    >
+      <span class="inline-flex size-14 items-center justify-center rounded-full border border-line-strong bg-bg/80 text-fg backdrop-blur">
+        <Play class="ml-0.5 size-5 fill-current" />
+      </span>
+    </button>
+    <span class="absolute bottom-2 right-2 rounded-md border border-line-strong bg-bg/85 px-1.5 py-0.5 font-mono text-[0.6875rem] text-fg backdrop-blur">
+      {video.duration}
+    </span>
+  </div>
+
+  <div class="p-4">
+    <div class="flex flex-wrap items-center gap-2">
+      <Badge tone="accent">{video.category}</Badge>
+      <time datetime={video.publishedAt} class="font-mono text-[0.6875rem] text-subtle">{formatDate(video.publishedAt)}</time>
+    </div>
+    <a href={video.videoUrl} target="_blank" rel="noreferrer" class="mt-2 block font-semibold leading-snug text-fg hover:text-accent">
+      {video.title}
+    </a>
+    <p class="mt-1.5 line-clamp-2 text-sm text-muted">{video.description}</p>
+  </div>
+</article>

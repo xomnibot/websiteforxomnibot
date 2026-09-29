@@ -1,0 +1,172 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import BrandIcon from '@/components/ui/BrandIcon.astro';
+import HeroTerminal, { type TerminalLine } from '@/components/home/HeroTerminal.astro';
+import StatsRow from '@/components/home/StatsRow.astro';
+import FeaturedGrid from '@/components/home/FeaturedGrid.astro';
+import LatestList from '@/components/home/LatestList.astro';
+import CollectionTiles from '@/components/home/CollectionTiles.astro';
+import NowPanel from '@/components/home/NowPanel.astro';
+import ClosingCta from '@/components/home/ClosingCta.astro';
+import { siteConfig } from '@/lib/site';
+import { getPublished, getAllPublished, collectionMeta, type CollectionKey } from '@/lib/collections';
+import { ArrowRight } from '@lucide/astro';
+
+const [writeups, research, projects, blog, cheatsheets, allEntries] = await Promise.all([
+  getPublished('writeups'),
+  getPublished('research'),
+  getPublished('projects'),
+  getPublished('blog'),
+  getPublished('cheatsheets'),
+  getAllPublished(),
+]);
+
+const counts: Record<CollectionKey, number> = {
+  writeups: writeups.length,
+  research: research.length,
+  projects: projects.length,
+  blog: blog.length,
+  cheatsheets: cheatsheets.length,
+};
+
+const featured = allEntries.filter((e) => e.data.featured).slice(0, 5);
+
+// Terminal content — built entirely from real site data.
+const terminalLines: TerminalLine[] = [
+  {
+    cmd: 'whoami',
+    output: [`${siteConfig.persona.handle} — ${siteConfig.persona.role}`],
+  },
+  {
+    cmd: 'cat focus.txt',
+    output: [
+      `active_target : ${siteConfig.currentFocus.activeTarget}`,
+      `research      : ${siteConfig.currentFocus.currentResearch}`,
+      `tool          : ${siteConfig.currentFocus.activeTool}`,
+      `next_video    : ${siteConfig.currentFocus.nextVideo}`,
+    ],
+  },
+  {
+    cmd: 'ls ~/writeups | head -3',
+    output:
+      writeups.length > 0
+        ? writeups.slice(0, 3).map((w) => w.id)
+        : ['(no writeups published yet)'],
+  },
+  {
+    cmd: './stats --summary',
+    output: siteConfig.stats.map((s) => `${s.label.padEnd(24, '.')} ${s.value}`),
+  },
+];
+
+const pageTitle = `${siteConfig.name} — ${siteConfig.tagline}`;
+---
+
+<BaseLayout title={pageTitle} description={siteConfig.description}>
+  <!-- Hero -->
+  <Container class="pt-14 pb-16 sm:pt-20 sm:pb-24">
+    <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <div class="inline-flex items-center gap-2 rounded-full border border-line bg-elevated px-3 py-1.5">
+          <span class="relative flex size-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60 motion-reduce:animate-none"></span>
+            <span class="relative inline-flex size-2 rounded-full bg-accent"></span>
+          </span>
+          <span class="font-mono text-xs text-muted">
+            Currently researching: <span class="text-fg">{siteConfig.currentFocus.currentResearch}</span>
+          </span>
+        </div>
+
+        <h1 class="mt-6 text-4xl font-semibold tracking-tight text-fg sm:text-5xl lg:text-[3.25rem] lg:leading-[1.05]">
+          {siteConfig.tagline}. <span class="text-muted">Breaking systems, then explaining exactly how.</span>
+        </h1>
+
+        <p class="mt-5 max-w-xl text-base text-muted sm:text-lg">
+          {siteConfig.description} Writeups, CVE research, and open-source tooling — published as I build it, not
+          polished after the fact.
+        </p>
+
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <Button href="/writeups" variant="primary" size="lg">
+            Read writeups
+            <ArrowRight class="size-4" />
+          </Button>
+          <Button href="/research" variant="secondary" size="lg">Explore research</Button>
+          <Button href={siteConfig.socials.github} target="_blank" rel="noreferrer" variant="ghost" size="lg">
+            <BrandIcon name="github" class="size-4" />
+            GitHub
+          </Button>
+        </div>
+      </div>
+
+      <HeroTerminal lines={terminalLines} class="lg:justify-self-end lg:w-full" />
+    </div>
+  </Container>
+
+  <!-- Stats -->
+  <Container class="pb-16 sm:pb-24">
+    <StatsRow stats={siteConfig.stats} />
+  </Container>
+
+  <!-- Featured -->
+  {
+    featured.length > 0 && (
+      <Container class="pb-16 sm:pb-24">
+        <SectionHeading
+          eyebrow="// featured"
+          title="Featured work"
+          description="A cross-section of the research, writeups, and tooling worth starting with."
+          class="mb-8"
+        />
+        <FeaturedGrid entries={featured} />
+      </Container>
+    )
+  }
+
+  <!-- Latest from each area -->
+  <Container class="pb-16 sm:pb-24">
+    <SectionHeading eyebrow="// latest" title="Fresh off the lab bench" class="mb-8" />
+    <div class="grid gap-4 lg:grid-cols-2">
+      <LatestList
+        eyebrow={collectionMeta.writeups.eyebrow}
+        title="Latest writeups"
+        href={collectionMeta.writeups.href}
+        entries={writeups.slice(0, 4)}
+      />
+      <LatestList
+        eyebrow={collectionMeta.research.eyebrow}
+        title="Latest research"
+        href={collectionMeta.research.href}
+        entries={research.slice(0, 4)}
+      />
+    </div>
+  </Container>
+
+  <!-- Browse by collection -->
+  <Container class="pb-16 sm:pb-24">
+    <SectionHeading eyebrow="// browse" title="Browse by collection" class="mb-8" />
+    <CollectionTiles counts={counts} />
+  </Container>
+
+  <!-- Now -->
+  <Container class="pb-16 sm:pb-24">
+    <div class="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+      <div>
+        <SectionHeading eyebrow="// now" title="What I'm heads-down on" class="mb-4" />
+        <p class="max-w-lg text-muted">
+          A living snapshot of the target, research thread, tool, and video currently occupying most of my time —
+          updated as things move, not on a schedule.
+        </p>
+      </div>
+      <NowPanel currentFocus={siteConfig.currentFocus} />
+    </div>
+  </Container>
+
+  <!-- Closing CTA -->
+  <Container class="pb-20 sm:pb-28">
+    <ClosingCta />
+  </Container>
+</BaseLayout>

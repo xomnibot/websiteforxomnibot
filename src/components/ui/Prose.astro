@@ -1,0 +1,19 @@
+---
+/**
+ * Wraps rendered Markdown/MDX bodies with themed `@tailwindcss/typography`
+ * classes. The `.prose` CSS-variable overrides in `src/styles/global.css`
+ * already track light/dark automatically, so no `prose-invert` modifier is
+ * needed here.
+ */
+import { cn } from '@/lib/utils';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class={cn('prose max-w-none', className)}>
+  <slot />
+</div>

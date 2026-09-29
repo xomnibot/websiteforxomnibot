@@ -1,0 +1,53 @@
+---
+/** "Browse by collection" tiles with live entry counts. */
+import { collectionMeta, type CollectionKey } from '@/lib/collections';
+import { COLLECTIONS } from '@/lib/schemas';
+import { ShieldHalf, FlaskConical, FolderGit2, NotebookPen, Terminal as TerminalIcon, ArrowUpRight } from '@lucide/astro';
+
+interface Props {
+  counts: Record<CollectionKey, number>;
+  class?: string;
+}
+
+const { counts, class: className = '' } = Astro.props;
+
+const icons: Record<CollectionKey, typeof ShieldHalf> = {
+  writeups: ShieldHalf,
+  research: FlaskConical,
+  projects: FolderGit2,
+  blog: NotebookPen,
+  cheatsheets: TerminalIcon,
+};
+---
+
+<div class={`grid gap-3 sm:grid-cols-2 lg:grid-cols-5 ${className}`}>
+  {
+    COLLECTIONS.map((key) => {
+      const meta = collectionMeta[key];
+      const Icon = icons[key];
+      const count = counts[key] ?? 0;
+      return (
+        <a
+          href={meta.href}
+          data-spotlight
+          class="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-line bg-elevated p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40"
+        >
+          <div class="relative z-[2] flex flex-1 flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-surface text-accent">
+                <Icon class="size-4" />
+              </span>
+              <ArrowUpRight class="size-4 text-subtle transition-colors group-hover:text-accent" />
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-fg">{meta.label}</p>
+              <p class="mt-0.5 font-mono text-xs text-subtle">
+                {count} {count === 1 ? 'entry' : 'entries'}
+              </p>
+            </div>
+          </div>
+        </a>
+      );
+    })
+  }
+</div>

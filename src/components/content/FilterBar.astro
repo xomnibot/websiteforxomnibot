@@ -1,0 +1,188 @@
+---
+/**
+ * Text filter + single-select chip groups for a collection listing page.
+ * Category is available on every collection; platform/difficulty
+ * (writeups), severity (research), status (projects) are added when
+ * relevant. Purely client-side: hides/shows sibling [data-post-card]
+ * elements found under the nearest [data-post-collection] container, and
+ * mirrors state into the URL query string (?q=&category=&platform=...) so
+ * filtered links are shareable and pre-apply on arrival.
+ */
+import { X } from '@lucide/astro';
+import type { AnyEntry, CollectionKey } from '@/lib/collections';
+
+interface Props {
+  collection: CollectionKey;
+  entries: AnyEntry[];
+}
+
+const { collection, entries } = Astro.props;
+
+function uniqueSorted(values: (string | undefined)[]): string[] {
+  return [...new Set(values.filter((v): v is string => Boolean(v)))].sort((a, b) => a.localeCompare(b));
+}
+
+function field(entry: AnyEntry, key: string): string | undefined {
+  return (entry.data as Record<string, unknown>)[key] as string | undefined;
+}
+
+interface ChipGroup {
+  key: string;
+  label: string;
+  values: string[];
+}
+
+const groups: ChipGroup[] = [
+  { key: 'category', label: 'Category', values: uniqueSorted(entries.map((e) => e.data.category)) },
+];
+
+if (collection === 'writeups') {
+  groups.push({ key: 'platform', label: 'Platform', values: uniqueSorted(entries.map((e) => field(e, 'platform'))) });
+  groups.push({
+    key: 'difficulty',
+    label: 'Difficulty',
+    values: uniqueSorted(entries.map((e) => field(e, 'difficulty'))),
+  });
+}
+if (collection === 'research') {
+  groups.push({ key: 'severity', label: 'Severity', values: uniqueSorted(entries.map((e) => field(e, 'severity'))) });
+}
+if (collection === 'projects') {
+  groups.push({ key: 'status', label: 'Status', values: uniqueSorted(entries.map((e) => field(e, 'status'))) });
+}
+
+const visibleGroups = groups.filter((g) => g.values.length > 1);
+---
+
+<div data-filter-bar class="space-y-4">
+  <input
+    type="search"
+    data-filter-text
+    placeholder="Search title, description, tags..."
+    aria-label={`Search ${collection}`}
+    class="w-full rounded-lg border border-line bg-elevated px-3.5 py-2.5 text-sm text-fg placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+  />
+
+  {visibleGroups.length > 0 && (
+    <div class="space-y-3">
+      {visibleGroups.map((group) => (
+        <div class="flex flex-wrap items-center gap-2" role="group" aria-label={group.label}>
+          <span class="font-mono text-xs uppercase tracking-widest text-subtle">{group.label}</span>
+          {group.values.map((value) => (
+            <button
+              type="button"
+              data-filter-group={group.key}
+              data-filter-value={value}
+              aria-pressed="false"
+              class="rounded-md border border-line bg-surface px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/40 hover:text-fg aria-pressed:border-accent/50 aria-pressed:bg-accent/10 aria-pressed:text-accent"
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  )}
+
+  <button
+    type="button"
+    data-filter-clear
+    class="inline-flex items-center gap-1.5 font-mono text-xs text-subtle transition-colors hover:text-accent"
+  >
+    <X class="size-3.5" /> Clear filters
+  </button>
+</div>
+
+<script>
+  function initFilterBar() {
+    const bar = document.querySelector<HTMLElement>('[data-filter-bar]');
+    const grid = document.querySelector<HTMLElement>('[data-post-collection]');
+    if (!bar || !grid) return;
+
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-post-card]'));
+    const emptyState = document.querySelector<HTMLElement>('[data-empty-state]');
+    const countEl = document.querySelector<HTMLElement>('[data-result-count]');
+    const textInput = bar.querySelector<HTMLInputElement>('[data-filter-text]');
+    const chipButtons = Array.from(bar.querySelectorAll<HTMLButtonElement>('[data-filter-value]'));
+    const clearButtons = document.querySelectorAll<HTMLButtonElement>('[data-filter-clear]');
+
+    const groupKeys = [...new Set(chipButtons.map((b) => b.dataset.filterGroup ?? ''))].filter(Boolean);
+
+    const params = new URLSearchParams(window.location.search);
+    const state: Record<string, string> = { q: params.get('q') ?? '' };
+    groupKeys.forEach((g) => {
+      state[g] = params.get(g) ?? '';
+    });
+
+    function syncControls() {
+      if (textInput) textInput.value = state.q;
+      chipButtons.forEach((btn) => {
+        const g = btn.dataset.filterGroup ?? '';
+        const active = Boolean(state[g]) && state[g] === btn.dataset.filterValue;
+        btn.setAttribute('aria-pressed', String(active));
+      });
+    }
+
+    function apply() {
+      const q = state.q.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach((card) => {
+        let match = true;
+        if (q && !(card.dataset.search ?? '').includes(q)) match = false;
+        if (match) {
+          for (const g of groupKeys) {
+            if (state[g] && card.dataset[g] !== state[g]) {
+              match = false;
+              break;
+            }
+          }
+        }
+        card.hidden = !match;
+        if (match) visible += 1;
+      });
+
+      if (countEl) countEl.textContent = String(visible);
+      if (emptyState) emptyState.hidden = visible !== 0;
+
+      const next = new URLSearchParams();
+      if (state.q) next.set('q', state.q);
+      groupKeys.forEach((g) => {
+        if (state[g]) next.set(g, state[g]);
+      });
+      const qs = next.toString();
+      window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
+    }
+
+    textInput?.addEventListener('input', () => {
+      state.q = textInput.value;
+      apply();
+    });
+
+    chipButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const g = btn.dataset.filterGroup ?? '';
+        const v = btn.dataset.filterValue ?? '';
+        state[g] = state[g] === v ? '' : v;
+        syncControls();
+        apply();
+      });
+    });
+
+    clearButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.q = '';
+        groupKeys.forEach((g) => {
+          state[g] = '';
+        });
+        syncControls();
+        apply();
+      });
+    });
+
+    syncControls();
+    apply();
+  }
+
+  initFilterBar();
+  document.addEventListener('astro:page-load', initFilterBar);
+</script>

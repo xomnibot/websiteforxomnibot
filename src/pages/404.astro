@@ -1,0 +1,84 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import { nav, siteConfig } from '@/lib/site';
+import { Search, ArrowLeft } from '@lucide/astro';
+
+const links = nav.primary;
+---
+
+<BaseLayout title="404 — Not found" description="This page doesn't exist." noindex>
+  <Container class="flex min-h-[70vh] flex-col items-center justify-center py-20 text-center">
+    <div class="w-full max-w-xl overflow-hidden rounded-xl border border-line bg-elevated text-left shadow-2xl shadow-black/10">
+      <div class="flex items-center gap-2 border-b border-line bg-surface px-4 py-3">
+        <span class="size-3 rounded-full bg-red/60"></span>
+        <span class="size-3 rounded-full bg-amber/60"></span>
+        <span class="size-3 rounded-full bg-green/60"></span>
+        <p class="ml-2 font-mono text-xs text-subtle">xomnibot@lab: ~</p>
+      </div>
+      <div class="space-y-3 p-5 font-mono text-sm leading-relaxed">
+        <p class="flex flex-wrap items-center gap-1.5">
+          <span class="text-accent">❯</span>
+          <span class="text-fg">cd <span data-404-path>{Astro.url.pathname}</span></span>
+        </p>
+        <p class="text-red">
+          bash: cd: <span data-404-path>{Astro.url.pathname}</span>: No such file or directory
+        </p>
+        <p class="flex flex-wrap items-center gap-1.5 pt-2">
+          <span class="text-accent">❯</span>
+          <span class="text-fg">./whereami.sh --suggest</span>
+        </p>
+        <p class="text-muted">
+          404 — that page doesn't exist (or moved). Try search, or jump back to a section below.
+        </p>
+      </div>
+    </div>
+
+    <script is:inline>
+      // This page is fully static (no SSR), so the path baked in at build
+      // time is just the /404/ route itself. Swap in the path the visitor
+      // actually requested, client-side, as a progressive enhancement.
+      (function () {
+        var path = window.location.pathname || '/404';
+        document.querySelectorAll('[data-404-path]').forEach(function (el) {
+          el.textContent = path;
+        });
+      })();
+    </script>
+
+    <h1 class="mt-8 text-3xl font-semibold tracking-tight text-fg sm:text-4xl">Command not found.</h1>
+    <p class="mt-3 max-w-md text-muted">
+      The path you followed doesn't resolve to anything on {siteConfig.domain}. It may have been renamed, moved, or
+      never existed.
+    </p>
+
+    <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+      <Button
+        type="button"
+        variant="primary"
+        onclick="window.dispatchEvent(new CustomEvent('open-search'))"
+      >
+        <Search class="size-4" />
+        Search the site
+      </Button>
+      <Button href="/" variant="secondary">
+        <ArrowLeft class="size-4" />
+        Back home
+      </Button>
+    </div>
+
+    <nav aria-label="Main sections" class="mt-10 flex flex-wrap items-center justify-center gap-2">
+      {
+        links.map((item) => (
+          <a
+            href={item.href}
+            class="rounded-lg border border-line bg-elevated px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent/40 hover:text-accent"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </Container>
+</BaseLayout>

@@ -1,0 +1,33 @@
+---
+/**
+ * Responsive grid of PostCards. If any entry in the list is `featured`, the
+ * first one is pulled out and rendered large above the grid. Every card
+ * carries data-post-card / data-search / data-* attributes (see PostCard)
+ * consumed by FilterBar — this wrapper carries data-post-collection so
+ * FilterBar's script knows where to look for cards on this page.
+ */
+import PostCard from './PostCard.astro';
+import type { AnyEntry } from '@/lib/collections';
+
+interface Props {
+  entries: AnyEntry[];
+  class?: string;
+}
+
+const { entries, class: className } = Astro.props;
+const featured = entries.find((e) => e.data.featured);
+const rest = featured ? entries.filter((e) => e !== featured) : entries;
+---
+
+<div data-post-collection class={className}>
+  {featured && (
+    <div class="mb-6">
+      <PostCard entry={featured} featured />
+    </div>
+  )}
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {rest.map((entry) => (
+      <PostCard entry={entry} />
+    ))}
+  </div>
+</div>

@@ -1,0 +1,41 @@
+---
+/** Closing CTA: subscribe on YouTube, follow on GitHub, or subscribe via RSS. */
+import Button from '@/components/ui/Button.astro';
+import BrandIcon from '@/components/ui/BrandIcon.astro';
+import { Rss } from '@lucide/astro';
+import { siteConfig } from '@/lib/site';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class={`relative overflow-hidden rounded-xl border border-line bg-elevated p-8 text-center sm:p-12 ${className}`}>
+  <div aria-hidden="true" class="bg-grid bg-glow pointer-events-none absolute inset-x-0 top-0 -z-0 h-full opacity-70"></div>
+  <div class="relative z-[1] mx-auto max-w-xl">
+    <p class="font-mono text-xs uppercase tracking-widest text-accent">// stay in the loop</p>
+    <h2 class="mt-3 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
+      New writeups, research, and videos — no algorithm required.
+    </h2>
+    <p class="mt-3 text-muted">
+      Follow along on YouTube for walkthroughs, star the repos on GitHub, or subscribe via RSS to get new posts the
+      moment they ship.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <Button href={siteConfig.socials.youtube} target="_blank" rel="noreferrer" variant="primary">
+        <BrandIcon name="youtube" class="size-4" />
+        Subscribe on YouTube
+      </Button>
+      <Button href={siteConfig.socials.github} target="_blank" rel="noreferrer" variant="secondary">
+        <BrandIcon name="github" class="size-4" />
+        GitHub
+      </Button>
+      <Button href="/rss.xml" variant="ghost">
+        <Rss class="size-4" />
+        RSS
+      </Button>
+    </div>
+  </div>
+</div>

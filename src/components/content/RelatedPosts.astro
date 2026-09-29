@@ -1,0 +1,21 @@
+---
+import PostCard from './PostCard.astro';
+import type { AnyEntry } from '@/lib/collections';
+
+interface Props {
+  entries: AnyEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+{entries.length > 0 && (
+  <section aria-labelledby="related-heading" class="space-y-4">
+    <h2 id="related-heading" class="font-mono text-xs uppercase tracking-widest text-accent">// related</h2>
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {entries.map((entry) => (
+        <PostCard entry={entry} showCollectionBadge />
+      ))}
+    </div>
+  </section>
+)}

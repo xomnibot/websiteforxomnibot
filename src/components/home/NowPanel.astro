@@ -1,0 +1,47 @@
+---
+/** "Now" / current-focus panel, sourced verbatim from siteConfig.currentFocus. */
+import { Crosshair, FlaskConical, Wrench, Video } from '@lucide/astro';
+
+interface Props {
+  currentFocus: {
+    activeTarget: string;
+    currentResearch: string;
+    activeTool: string;
+    nextVideo: string;
+  };
+  class?: string;
+}
+
+const { currentFocus, class: className = '' } = Astro.props;
+
+const rows = [
+  { icon: Crosshair, label: 'Active target', value: currentFocus.activeTarget },
+  { icon: FlaskConical, label: 'Current research', value: currentFocus.currentResearch },
+  { icon: Wrench, label: 'Active tool', value: currentFocus.activeTool },
+  { icon: Video, label: 'Next video', value: currentFocus.nextVideo },
+];
+---
+
+<div class={`rounded-xl border border-line bg-elevated p-5 sm:p-6 ${className}`}>
+  <div class="flex items-center gap-2">
+    <span class="relative flex size-2">
+      <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60 motion-reduce:animate-none"></span>
+      <span class="relative inline-flex size-2 rounded-full bg-accent"></span>
+    </span>
+    <p class="font-mono text-xs uppercase tracking-widest text-accent">// now</p>
+  </div>
+
+  <dl class="mt-4 divide-y divide-line">
+    {
+      rows.map((row) => (
+        <div class="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+          <row.icon class="mt-0.5 size-4 shrink-0 text-subtle" />
+          <div class="min-w-0">
+            <dt class="font-mono text-[0.6875rem] uppercase tracking-wide text-subtle">{row.label}</dt>
+            <dd class="mt-0.5 text-sm text-fg">{row.value}</dd>
+          </div>
+        </div>
+      ))
+    }
+  </dl>
+</div>

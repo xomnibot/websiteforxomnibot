@@ -1,0 +1,51 @@
+---
+/**
+ * Shared shell for all five `/<collection>` index pages: breadcrumb,
+ * heading, live result count, FilterBar, PostGrid, EmptyState. Each
+ * `src/pages/<collection>/index.astro` is just `<CollectionListing
+ * collection="..." />`.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
+import FilterBar from './FilterBar.astro';
+import PostGrid from './PostGrid.astro';
+import EmptyState from './EmptyState.astro';
+import { getPublished, collectionMeta, type CollectionKey } from '@/lib/collections';
+
+interface Props {
+  collection: CollectionKey;
+}
+
+const { collection } = Astro.props;
+const meta = collectionMeta[collection];
+const entries = await getPublished(collection);
+---
+
+<BaseLayout title={meta.label} description={meta.description}>
+  <Container class="space-y-8 py-12 sm:py-16">
+    <div class="space-y-4">
+      <TerminalPrompt path={`~${meta.href}`} />
+      <SectionHeading eyebrow={meta.eyebrow} title={meta.label} description={meta.description} />
+      <p class="font-mono text-xs text-subtle">
+        <span data-result-count>{entries.length}</span> {meta.label.toLowerCase()}
+      </p>
+    </div>
+
+    {entries.length === 0 ? (
+      <EmptyState
+        message={`No ${meta.label.toLowerCase()} yet.`}
+        hint="Check back soon — new posts are on the way."
+        hidden={false}
+        showClearButton={false}
+      />
+    ) : (
+      <div class="space-y-8">
+        <FilterBar collection={collection} entries={entries} />
+        <PostGrid entries={entries} />
+        <EmptyState />
+      </div>
+    )}
+  </Container>
+</BaseLayout>

@@ -1,0 +1,19 @@
+---
+/**
+ * Wrap an ordered markdown list to render it as numbered steps:
+ *
+ *   <Steps>
+ *
+ *   1. First thing
+ *   2. Second thing
+ *
+ *   </Steps>
+ *
+ * Blank lines around the list are required so MDX parses it as a real
+ * markdown `<ol>` instead of raw text.
+ */
+---
+
+<div class="steps-list not-prose my-6">
+  <slot />
+</div>

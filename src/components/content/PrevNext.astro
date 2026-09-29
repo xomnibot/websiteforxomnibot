@@ -1,0 +1,41 @@
+---
+import { entryHref, type AnyEntry } from '@/lib/collections';
+import { ArrowLeft, ArrowRight } from '@lucide/astro';
+
+interface Props {
+  prev?: AnyEntry;
+  next?: AnyEntry;
+}
+
+const { prev, next } = Astro.props;
+---
+
+{(prev || next) && (
+  <nav aria-label="More posts in this collection" class="grid gap-4 sm:grid-cols-2">
+    {prev ? (
+      <a
+        href={entryHref(prev)}
+        data-spotlight
+        class="flex flex-col gap-1.5 rounded-xl border border-line bg-elevated p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40"
+      >
+        <span class="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest text-subtle">
+          <ArrowLeft class="size-3.5" /> Previous
+        </span>
+        <span class="line-clamp-2 font-medium text-fg">{prev.data.title}</span>
+      </a>
+    ) : <div aria-hidden="true" />}
+
+    {next ? (
+      <a
+        href={entryHref(next)}
+        data-spotlight
+        class="flex flex-col gap-1.5 rounded-xl border border-line bg-elevated p-4 text-right transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 sm:items-end"
+      >
+        <span class="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest text-subtle">
+          Next <ArrowRight class="size-3.5" />
+        </span>
+        <span class="line-clamp-2 font-medium text-fg">{next.data.title}</span>
+      </a>
+    ) : <div aria-hidden="true" />}
+  </nav>
+)}

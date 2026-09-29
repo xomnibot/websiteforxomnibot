@@ -1,0 +1,50 @@
+---
+/**
+ * Collection-specific badge row for an entry: difficulty/platform (writeups),
+ * CVE + severity (research), language/status/stars (projects), category
+ * (blog/cheatsheets). Shared by PostCard and PostHeader so both stay in sync.
+ */
+import Badge from '@/components/ui/Badge.astro';
+import { difficultyTone, severityTone, statusTone } from '@/lib/badges';
+import { ShieldAlert, Star } from '@lucide/astro';
+import type { AnyEntry } from '@/lib/collections';
+
+interface Props {
+  entry: AnyEntry;
+  class?: string;
+}
+
+const { entry, class: className } = Astro.props;
+---
+
+<div class={className ?? 'flex flex-wrap items-center gap-1.5'}>
+  {entry.collection === 'writeups' && entry.data.difficulty && (
+    <Badge tone={difficultyTone(entry.data.difficulty)}>{entry.data.difficulty}</Badge>
+  )}
+  {entry.collection === 'writeups' && <Badge tone="neutral">{entry.data.platform}</Badge>}
+
+  {entry.collection === 'research' && entry.data.cve && (
+    <Badge tone="accent">
+      <ShieldAlert class="size-3" />
+      {entry.data.cve}
+    </Badge>
+  )}
+  {entry.collection === 'research' && entry.data.severity && (
+    <Badge tone={severityTone(entry.data.severity)}>{entry.data.severity}</Badge>
+  )}
+
+  {entry.collection === 'projects' && entry.data.language && (
+    <Badge tone="neutral">{entry.data.language}</Badge>
+  )}
+  {entry.collection === 'projects' && <Badge tone={statusTone(entry.data.status)}>{entry.data.status}</Badge>}
+  {entry.collection === 'projects' && typeof entry.data.stars === 'number' && (
+    <Badge tone="neutral">
+      <Star class="size-3" />
+      {entry.data.stars.toLocaleString()}
+    </Badge>
+  )}
+
+  {(entry.collection === 'blog' || entry.collection === 'cheatsheets') && (
+    <Badge tone="neutral">{entry.data.category}</Badge>
+  )}
+</div>

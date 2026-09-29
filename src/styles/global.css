@@ -1,0 +1,413 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@plugin '@tailwindcss/typography';
+
+/* Dark mode is driven by a `.dark` class on <html>, toggled by ThemeToggle
+   and set on first paint by the no-flash script in BaseLayout — not by the
+   `prefers-color-scheme` media query. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* -----------------------------------------------------------------------
+   Design tokens — light on :root, dark on .dark. Keep these two blocks in
+   sync: same variable names, different values.
+----------------------------------------------------------------------- */
+:root {
+  --bg: #fafafa;
+  --bg-elevated: #ffffff;
+  --surface: #f4f4f5;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --fg: #09090b;
+  --fg-muted: #52525b;
+  --fg-subtle: #71717a;
+  --accent: #059669;
+  --accent-fg: #ffffff;
+  --accent-2: #0284c7;
+
+  /* status colors — used by Badge tones, difficulty/severity chips */
+  --status-green: #16a34a;
+  --status-amber: #d97706;
+  --status-orange: #ea580c;
+  --status-red: #dc2626;
+  --status-blue: #0284c7;
+}
+
+.dark {
+  --bg: #09090b;
+  --bg-elevated: #0f0f12;
+  --surface: #141418;
+  --border: #232329;
+  --border-strong: #33333b;
+  --fg: #ededef;
+  --fg-muted: #a1a1aa;
+  --fg-subtle: #71717a;
+  --accent: #3ee6a0;
+  --accent-fg: #04130c;
+  --accent-2: #38bdf8;
+
+  --status-green: #22c55e;
+  --status-amber: #f59e0b;
+  --status-orange: #fb923c;
+  --status-red: #f87171;
+  --status-blue: #38bdf8;
+}
+
+/* -----------------------------------------------------------------------
+   Map tokens onto Tailwind v4 utilities. `inline` because the values
+   reference CSS vars that change when `.dark` toggles — Tailwind must keep
+   them as var() references in the generated CSS rather than baking them in.
+   Result: utilities like `bg-elevated`, `text-muted`, `border-line`,
+   `text-accent`, `bg-green/10` all work in both themes automatically.
+----------------------------------------------------------------------- */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-elevated: var(--bg-elevated);
+  --color-surface: var(--surface);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-2: var(--accent-2);
+
+  --color-green: var(--status-green);
+  --color-amber: var(--status-amber);
+  --color-orange: var(--status-orange);
+  --color-red: var(--status-red);
+  --color-blue: var(--status-blue);
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* -----------------------------------------------------------------------
+   Base styles
+----------------------------------------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    letter-spacing: -0.015em;
+    font-weight: 600;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* scrollbar */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border-radius: 999px;
+    border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--fg-subtle);
+  }
+}
+
+/* -----------------------------------------------------------------------
+   Utilities: grid/glow background signature + cursor-spotlight cards
+----------------------------------------------------------------------- */
+@layer utilities {
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black 30%, transparent 100%);
+    opacity: 0.6;
+  }
+
+  .bg-glow {
+    background: radial-gradient(
+      600px circle at 50% -10%,
+      color-mix(in srgb, var(--accent) 20%, transparent),
+      transparent 70%
+    );
+  }
+}
+
+/* Cursor-following spotlight, driven by --spotlight-x/--spotlight-y set by
+   a tiny shared script (see BaseLayout) on any element with [data-spotlight]. */
+[data-spotlight] {
+  position: relative;
+  isolation: isolate;
+}
+[data-spotlight]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  background: radial-gradient(
+    220px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    transparent 70%
+  );
+}
+[data-spotlight]:hover::before,
+[data-spotlight]:focus-within::before {
+  opacity: 1;
+}
+
+/* Steps MDX component: numbered ordered list */
+.steps-list ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.steps-list ol > li {
+  counter-increment: steps-counter;
+  position: relative;
+  margin-left: 1.1rem;
+  padding-bottom: 1.5rem;
+  padding-left: 2.25rem;
+  border-left: 1px solid var(--border);
+}
+.steps-list ol > li:last-child {
+  padding-bottom: 0;
+  border-left-color: transparent;
+}
+.steps-list ol {
+  counter-reset: steps-counter;
+}
+.steps-list ol > li::before {
+  content: counter(steps-counter);
+  position: absolute;
+  left: -1.05rem;
+  top: 0;
+  display: inline-flex;
+  height: 2.1rem;
+  width: 2.1rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background-color: var(--bg-elevated);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.steps-list ol > li > *:first-child {
+  margin-top: 0;
+}
+.steps-list ol > li p {
+  margin: 0 0 0.5rem;
+  color: var(--fg-muted);
+}
+.steps-list ol > li strong {
+  color: var(--fg);
+}
+.steps-list ol > li .expressive-code {
+  margin: 0.75rem 0 0;
+}
+
+/* -----------------------------------------------------------------------
+   Prose theming (@tailwindcss/typography) — mapped onto our tokens so
+   both .md and .mdx bodies render identically themed content, including
+   GFM tables/task-lists/footnotes and heading anchors from rehype-slug +
+   rehype-autolink-headings.
+----------------------------------------------------------------------- */
+@layer components {
+  .prose {
+    --tw-prose-body: var(--fg-muted);
+    --tw-prose-headings: var(--fg);
+    --tw-prose-lead: var(--fg-muted);
+    --tw-prose-links: var(--accent);
+    --tw-prose-bold: var(--fg);
+    --tw-prose-counters: var(--fg-subtle);
+    --tw-prose-bullets: var(--border-strong);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--fg);
+    --tw-prose-quote-borders: var(--accent);
+    --tw-prose-captions: var(--fg-subtle);
+    --tw-prose-kbd: var(--fg);
+    --tw-prose-kbd-shadows: 0 0 0 1px var(--border-strong);
+    --tw-prose-code: var(--fg);
+    --tw-prose-pre-code: var(--fg);
+    --tw-prose-pre-bg: var(--surface);
+    --tw-prose-th-borders: var(--border-strong);
+    --tw-prose-td-borders: var(--border);
+    max-width: 100%;
+  }
+
+  .prose a {
+    font-weight: 500;
+    text-decoration-line: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .prose a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .prose :where(h2, h3, h4) {
+    scroll-margin-top: 5rem;
+  }
+  .prose .heading-anchor {
+    margin-left: 0.5rem;
+    font-weight: 400;
+    text-decoration: none;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .prose .heading-anchor::after {
+    content: '#';
+  }
+  .prose :where(h2, h3, h4):hover .heading-anchor,
+  .prose .heading-anchor:focus-visible {
+    opacity: 1;
+  }
+
+  .prose :where(code):not(:where(pre code)) {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    padding: 0.15em 0.4em;
+    font-weight: 500;
+    font-size: 0.875em;
+  }
+  .prose :where(code):not(:where(pre code))::before,
+  .prose :where(code):not(:where(pre code))::after {
+    content: '';
+  }
+
+  .prose blockquote {
+    font-style: normal;
+    border-left-color: var(--accent);
+  }
+  .prose blockquote p:first-of-type::before,
+  .prose blockquote p:last-of-type::after {
+    content: '';
+  }
+
+  .prose img,
+  .prose video {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    width: 100%;
+    height: auto;
+  }
+  .prose figure > img {
+    margin: 0;
+  }
+  .prose figcaption {
+    color: var(--fg-subtle);
+  }
+
+  .prose table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  /* GFM task lists */
+  .prose ul.contains-task-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  .prose li.task-list-item {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 1.6em;
+    position: relative;
+  }
+  .prose li.task-list-item input[type='checkbox'] {
+    position: absolute;
+    left: 0;
+    top: 0.4em;
+    accent-color: var(--accent);
+  }
+
+  /* GFM footnotes */
+  .prose [data-footnotes] {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.875em;
+  }
+  .prose [data-footnotes] p {
+    margin: 0;
+  }
+  .prose a[data-footnote-ref] {
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .prose a[data-footnote-backref] {
+    text-decoration: none;
+  }
+
+  /* Expressive Code block spacing inside prose */
+  .prose .expressive-code {
+    margin: 1.75em 0;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   Motion
+----------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

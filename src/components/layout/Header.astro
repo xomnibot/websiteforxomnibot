@@ -1,0 +1,98 @@
+---
+import Container from '@/components/ui/Container.astro';
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import BrandIcon from '@/components/ui/BrandIcon.astro';
+import { nav, siteConfig } from '@/lib/site';
+import { Search, Menu } from '@lucide/astro';
+
+const { pathname } = Astro.url;
+function isActive(href: string) {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+---
+
+<header class="sticky top-0 z-40 border-b border-line/80 bg-bg/75 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
+  <Container class="flex h-16 items-center justify-between gap-4">
+    <Logo />
+
+    <nav aria-label="Primary" class="hidden items-center gap-1 md:flex">
+      {
+        nav.primary.map((item) => (
+          <a
+            href={item.href}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+            class={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              isActive(item.href) ? 'text-accent' : 'text-muted hover:text-fg'
+            }`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        onclick="window.dispatchEvent(new CustomEvent('open-search'))"
+        class="hidden items-center gap-2 rounded-lg border border-line px-3 py-1.5 text-sm text-subtle transition-colors hover:border-accent/40 hover:text-fg sm:inline-flex"
+        aria-label="Open search"
+      >
+        <Search class="size-4" />
+        <span>Search</span>
+        <kbd
+          data-kbd-hint
+          class="ml-1 rounded border border-line-strong bg-surface px-1.5 py-0.5 font-mono text-[10px] text-subtle"
+        >
+          Ctrl K
+        </kbd>
+      </button>
+      <button
+        type="button"
+        onclick="window.dispatchEvent(new CustomEvent('open-search'))"
+        aria-label="Open search"
+        class="inline-flex size-9 items-center justify-center rounded-lg border border-line text-muted sm:hidden"
+      >
+        <Search class="size-4" />
+      </button>
+
+      <ThemeToggle />
+
+      <a
+        href={siteConfig.socials.github}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="GitHub"
+        class="hidden size-9 items-center justify-center rounded-lg border border-line text-muted transition-colors hover:border-accent/40 hover:text-accent sm:inline-flex"
+      >
+        <BrandIcon name="github" />
+      </a>
+
+      <details data-mobile-nav class="relative md:hidden">
+        <summary
+          class="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-lg border border-line text-muted [&::-webkit-details-marker]:hidden"
+          aria-label="Open menu"
+        >
+          <Menu class="size-4" />
+        </summary>
+        <div class="absolute right-0 top-12 w-56 rounded-xl border border-line bg-elevated p-2 shadow-lg">
+          <nav aria-label="Mobile" class="flex flex-col">
+            {
+              [...nav.primary, ...nav.secondary].map((item) => (
+                <a
+                  href={item.href}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                  class="rounded-md px-3 py-2 text-sm text-muted hover:bg-surface hover:text-fg"
+                >
+                  {item.label}
+                </a>
+              ))
+            }
+          </nav>
+        </div>
+      </details>
+    </div>
+  </Container>
+</header>
