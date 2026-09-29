@@ -9,7 +9,13 @@ import SkillGroup from '@/components/about/SkillGroup.astro';
 import Timeline from '@/components/about/Timeline.astro';
 import { siteConfig } from '@/lib/site';
 import { timeline } from '@/data/timeline';
-import { Swords, ShieldHalf, Code, BrainCircuit, Sparkles, Monitor, SquareTerminal, Cpu, PenTool } from '@lucide/astro';
+import { bio, featuredProjects, capabilities, learningPath } from '@/data/about';
+import Badge from '@/components/ui/Badge.astro';
+import type { BadgeTone } from '@/components/ui/Badge.astro';
+import { Swords, ShieldHalf, Code, BrainCircuit, Sparkles, Monitor, SquareTerminal, Cpu, PenTool, Check, ArrowUpRight, CircleCheck, CircleDot, Circle } from '@lucide/astro';
+
+const projectStatusTone: Record<string, BadgeTone> = { Active: 'green', Stable: 'blue', Archived: 'neutral' };
+const learningIcon = { Completed: CircleCheck, 'In progress': CircleDot, Next: Circle } as const;
 
 const skillGroups = [
   { key: 'offensive', label: 'Offensive Security', icon: Swords, skills: siteConfig.skills.offensive },
@@ -35,12 +41,74 @@ const rig = [
     <h1 class="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-fg sm:text-5xl">
       Hi, I'm {siteConfig.persona.handle} — {siteConfig.persona.role}.
     </h1>
-    <p class="mt-5 max-w-2xl text-lg text-muted">{siteConfig.mission}</p>
-    <p class="mt-3 max-w-2xl text-muted">{siteConfig.description}</p>
+    {bio.map((para, i) => (
+      <p class:list={['max-w-2xl text-muted', i === 0 ? 'mt-5 text-lg' : 'mt-3']}>{para}</p>
+    ))}
 
     <div class="mt-8 flex flex-wrap items-center gap-3">
       <Button href="/contact" variant="primary">Get in touch</Button>
       <Button href="/writeups" variant="secondary">Read the writeups</Button>
+    </div>
+  </Container>
+
+  <!-- Featured projects -->
+  <Container class="pb-16 sm:pb-24">
+    <SectionHeading eyebrow="// projects" title="Things I've built" class="mb-8" />
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {featuredProjects.map((p) => {
+        const Tag = p.link ? 'a' : 'div';
+        return (
+          <Tag
+            href={p.link}
+            class:list={[
+              'group flex flex-col rounded-xl border border-line bg-elevated p-5 sm:p-6',
+              p.link && 'transition-colors hover:border-accent/40',
+            ]}
+          >
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="font-semibold tracking-tight text-fg group-hover:text-accent">
+                {p.name}
+                {p.link && <ArrowUpRight class="ml-1 inline size-3.5 text-subtle group-hover:text-accent" />}
+              </h3>
+              <Badge tone={projectStatusTone[p.status]}>{p.status}</Badge>
+            </div>
+            <p class="mt-2 text-sm text-muted">{p.summary}</p>
+            <ul class="mt-4 space-y-2">
+              {p.highlights.map((h) => (
+                <li class="flex items-start gap-2 text-sm text-muted">
+                  <Check class="mt-0.5 size-3.5 shrink-0 text-accent" />
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+            <div class="mt-auto flex flex-wrap gap-1.5 pt-5">
+              {p.stack.map((s) => (
+                <span class="rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-[0.6875rem] text-subtle">{s}</span>
+              ))}
+            </div>
+          </Tag>
+        );
+      })}
+    </div>
+  </Container>
+
+  <!-- Capabilities -->
+  <Container class="pb-16 sm:pb-24">
+    <SectionHeading eyebrow="// capabilities" title="What I can do" class="mb-8" />
+    <div class="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+      {capabilities.map((c) => (
+        <div class="bg-elevated p-5 sm:p-6">
+          <h3 class="font-semibold tracking-tight text-fg">{c.area}</h3>
+          <ul class="mt-3 space-y-2">
+            {c.points.map((pt) => (
+              <li class="flex items-start gap-2 text-sm text-muted">
+                <span class="mt-2 size-1 shrink-0 rounded-full bg-accent" />
+                <span>{pt}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   </Container>
 
@@ -92,6 +160,28 @@ const rig = [
         </ul>
       </div>
     </div>
+  </Container>
+
+  <!-- Learning path -->
+  <Container class="pb-16 sm:pb-24">
+    <SectionHeading eyebrow="// learning" title="Learning path" class="mb-8" />
+    <ol class="divide-y divide-line rounded-xl border border-line bg-elevated">
+      {learningPath.map((item) => {
+        const Icon = learningIcon[item.status];
+        return (
+          <li class="flex items-start gap-3 p-4 sm:items-center sm:p-5">
+            <Icon class:list={['mt-0.5 size-4 shrink-0 sm:mt-0', item.status === 'Next' ? 'text-subtle' : 'text-accent']} />
+            <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between sm:gap-6">
+              <div class="min-w-0">
+                <p class="font-medium text-fg">{item.name}</p>
+                <p class="mt-0.5 text-sm text-muted">{item.note}</p>
+              </div>
+              <span class="mt-2 inline-block shrink-0 font-mono text-xs text-subtle sm:mt-0">{item.status}</span>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   </Container>
 
   <!-- Timeline -->

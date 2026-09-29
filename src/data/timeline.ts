@@ -11,40 +11,53 @@ export interface TimelineMilestone {
 export const timeline: TimelineMilestone[] = [
   {
     year: '2026',
-    title: 'xomnibot.in Research Hub Launch',
+    title: 'Launched xomnibot.in',
     category: 'Platform',
     description:
-      'Launched the central xomnibot cybersecurity platform, unifying technical research, CTF writeups, security tooling, and educational resources.',
-    link: '/about',
+      'Moved all my notes, writeups and tools into one place, with a publishing flow that turns plain Markdown into posts.',
+    link: '/',
   },
   {
     year: '2026',
-    title: 'Released OmniScanner v1.0',
+    title: 'OmniScanner v1.0 released',
     category: 'Tool',
-    description: 'Published open-source AI static binary vulnerability analyzer for reverse engineers.',
+    description: 'First public release of my Rust binary-triage CLI, now used in my own reverse-engineering workflow.',
     link: '/projects/omniscanner',
   },
   {
     year: '2025',
-    title: 'Published CVE-2026 Kernel Research',
+    title: 'OAuth & JWT research series',
     category: 'Research',
     description:
-      'Discovered and reported Linux Kernel Netfilter Use-After-Free flaw with full root privilege escalation PoC.',
+      'Deep dives into OAuth 2.0 state and redirect flaws, plus a Burp extension for testing JWT implementations.',
     link: '/research',
   },
   {
     year: '2025',
-    title: 'First YouTube Technical Series',
+    title: 'Built an Active Directory attack lab',
     category: 'Milestone',
     description:
-      'Launched educational video series focusing on Web Security, Active Directory, and Reverse Engineering.',
-    link: '/youtube',
+      'Automated a vulnerable two-DC domain with Vagrant + Ansible and worked through Kerberoasting, ACL abuse and DCSync.',
+    link: '/writeups',
   },
   {
     year: '2024',
-    title: 'CTF Competition Milestones',
+    title: 'Home SOC lab + honeypot study',
+    category: 'Milestone',
+    description:
+      'Set up Wazuh, Suricata and Sysmon at home and ran a 30-day SSH honeypot to see real attacker behaviour.',
+  },
+  {
+    year: '2024',
+    title: 'First university CTF team',
     category: 'CTF',
-    description: 'Ranked in Top 1% on TryHackMe & PortSwigger Web Security Academy Leaderboards.',
+    description: 'Co-founded a small CTF team with classmates; weekly practice on web and pwn challenges.',
     link: '/writeups',
+  },
+  {
+    year: '2023',
+    title: 'Started with Linux and OverTheWire',
+    category: 'Milestone',
+    description: 'Daily-drove Linux, finished Bandit, and started the TryHackMe learning paths. That was it — hooked.',
   },
 ];
