@@ -1,0 +1,59 @@
+---
+/**
+ * Intentional "no cover" tile: subtle diagonal pattern, accent wash, the
+ * collection icon and title initials. Fills its (relatively positioned)
+ * parent, so it works in 16:9 card covers, 4:3 list thumbnails and the
+ * home featured grid. Pure tokens => correct in both themes.
+ */
+import type { AnyEntry } from '@/lib/collections';
+import { collectionMeta } from '@/lib/collections';
+import { Terminal, Bug, FolderGit2, FileText, ListChecks } from '@lucide/astro';
+
+interface Props {
+  entry: AnyEntry;
+  /** Compact = list thumbnail (icon only + initials, smaller). */
+  compact?: boolean;
+}
+const { entry, compact = false } = Astro.props;
+
+const icons = { writeups: Terminal, research: Bug, projects: FolderGit2, blog: FileText, cheatsheets: ListChecks } as const;
+const Icon = icons[entry.collection];
+
+const STOP = new Set(['the', 'a', 'an', 'of', 'to', 'and', 'for', 'in', 'on', 'with', 'vs']);
+const words = entry.data.title
+  .replace(/^[^:]+:\s+/, (m) => (m.split(' ').length <= 3 ? '' : m))
+  .split(/[\s\-–—/]+/)
+  .map((w) => w.replace(/[^A-Za-z0-9]/g, ''))
+  .filter((w) => w && !STOP.has(w.toLowerCase()));
+const initials = (words.slice(0, 2).map((w) => w[0]).join('') || entry.data.title.slice(0, 2)).toUpperCase();
+---
+
+<div
+  aria-hidden="true"
+  class="absolute inset-0 flex items-center justify-center overflow-hidden bg-surface"
+  style="background-image: repeating-linear-gradient(135deg, transparent 0 14px, var(--border) 14px 15px), radial-gradient(ellipse 70% 80% at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);"
+>
+  <div class={compact ? 'flex flex-col items-center gap-0.5' : 'flex flex-col items-center gap-2'}>
+    <span
+      class:list={[
+        'inline-flex items-center justify-center rounded-xl border border-line-strong bg-elevated text-accent shadow-sm',
+        compact ? 'size-8 rounded-lg' : 'size-12',
+      ]}
+    >
+      <Icon class={compact ? 'size-4' : 'size-6'} />
+    </span>
+    {
+      !compact && (
+        <span class="font-mono text-[0.6875rem] uppercase tracking-[0.2em] text-subtle">
+          {collectionMeta[entry.collection].singular}
+        </span>
+      )
+    }
+  </div>
+  <span
+    class:list={[
+      'pointer-events-none absolute select-none font-mono font-bold leading-none text-fg/[0.06]',
+      compact ? 'bottom-0.5 right-1.5 text-3xl' : 'bottom-2 right-4 text-7xl',
+    ]}>{initials}</span
+  >
+</div>

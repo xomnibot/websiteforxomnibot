@@ -42,9 +42,11 @@ const description = `${entries.length} post${entries.length === 1 ? '' : 's'} ta
       />
     </div>
 
-    <div class="flex justify-end">
-      <ViewToggle />
-    </div>
+    {entries.length > 1 && (
+      <div class="flex justify-end">
+        <ViewToggle />
+      </div>
+    )}
     <ListingView>
       <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 group-data-[view=list]/list:grid-cols-1 group-data-[view=list]/list:gap-3 sm:group-data-[view=list]/list:grid-cols-1 lg:group-data-[view=list]/list:grid-cols-1">
         {entries.map((entry) => (

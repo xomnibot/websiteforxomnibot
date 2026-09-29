@@ -8,6 +8,9 @@ const year = new Date().getFullYear();
 
 const socialLinks = [
   { href: siteConfig.socials.github, label: 'GitHub', brand: 'github' as const },
+  { href: siteConfig.socials.linkedin, label: 'LinkedIn', brand: 'linkedin' as const },
+  { href: siteConfig.socials.youtube, label: 'YouTube', brand: 'youtube' as const },
+  { href: siteConfig.socials.instagram, label: 'Instagram', brand: 'instagram' as const },
 ];
 ---
 
@@ -17,7 +20,7 @@ const socialLinks = [
       <a href="/" class="inline-flex items-center gap-1.5 font-mono text-base font-semibold text-fg">
         <span class="text-accent">&gt;_</span> xomnibot
       </a>
-      <p class="mt-5 max-w-sm text-sm leading-relaxed text-muted">{siteConfig.description}</p>
+      <p class="mt-5 max-w-sm text-sm leading-relaxed text-muted text-pretty">{siteConfig.description}</p>
       <div class="mt-7 flex items-center gap-3">
         {
           socialLinks.map(({ href, label, brand }) => (
@@ -43,12 +46,12 @@ const socialLinks = [
     </div>
 
     <div>
-      <p class="font-mono text-xs uppercase tracking-widest text-subtle">Content</p>
+      <p class="eyebrow text-subtle">Content</p>
       <ul class="mt-6 space-y-4">
         {
           nav.primary.map((item) => (
             <li>
-              <a href={item.href} class="text-sm text-muted hover:text-accent">
+              <a href={item.href} class="text-sm text-muted transition-colors hover:text-fg">
                 {item.label}
               </a>
             </li>
@@ -58,12 +61,12 @@ const socialLinks = [
     </div>
 
     <div>
-      <p class="font-mono text-xs uppercase tracking-widest text-subtle">More</p>
+      <p class="eyebrow text-subtle">More</p>
       <ul class="mt-6 space-y-4">
         {
           nav.secondary.map((item) => (
             <li>
-              <a href={item.href} class="text-sm text-muted hover:text-accent">
+              <a href={item.href} class="text-sm text-muted transition-colors hover:text-fg">
                 {item.label}
               </a>
             </li>

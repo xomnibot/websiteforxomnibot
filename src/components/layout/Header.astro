@@ -13,7 +13,7 @@ function isActive(href: string) {
 }
 ---
 
-<header class="sticky top-0 z-40 border-b border-line/80 bg-bg/75 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
+<header class="sticky top-0 z-40 border-b border-line/80 bg-bg/80 backdrop-blur-md backdrop-saturate-150 supports-[backdrop-filter]:bg-bg/65">
   <Container class="flex h-16 items-center justify-between gap-4">
     <Logo />
 
@@ -23,11 +23,14 @@ function isActive(href: string) {
           <a
             href={item.href}
             aria-current={isActive(item.href) ? 'page' : undefined}
-            class={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              isActive(item.href) ? 'text-accent' : 'text-muted hover:text-fg'
+            class={`relative rounded-md px-3 py-2 text-sm font-medium tracking-[-0.005em] transition-colors ${
+              isActive(item.href) ? 'text-fg' : 'text-muted hover:text-fg'
             }`}
           >
             {item.label}
+            {isActive(item.href) && (
+              <span aria-hidden="true" class="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-accent" />
+            )}
           </a>
         ))
       }
@@ -44,7 +47,7 @@ function isActive(href: string) {
         <span>Search</span>
         <kbd
           data-kbd-hint
-          class="ml-1 rounded border border-line-strong bg-surface px-1.5 py-0.5 font-mono text-[10px] text-subtle"
+          class="ml-1 rounded border border-line-strong bg-surface px-1.5 py-0.5 font-mono text-[10px] leading-none text-subtle"
         >
           Ctrl K
         </kbd>

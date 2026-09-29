@@ -13,7 +13,7 @@ import { formatDate, formatIsoDate } from '@/lib/utils';
 import { entryHref, entryDescription, entryReadingTime, collectionMeta, type AnyEntry } from '@/lib/collections';
 import Badge from '@/components/ui/Badge.astro';
 import EntryBadges from './EntryBadges.astro';
-import { Terminal, Bug, FolderGit2, FileText, ListChecks } from '@lucide/astro';
+import CoverFallback from './CoverFallback.astro';
 
 interface Props {
   entry: AnyEntry;
@@ -30,15 +30,6 @@ const description = entryDescription(entry);
 const date = entry.data.date;
 const readingTime = entryReadingTime(entry);
 const tags = entry.data.tags.slice(0, 3);
-
-const glyphs = {
-  writeups: Terminal,
-  research: Bug,
-  projects: FolderGit2,
-  blog: FileText,
-  cheatsheets: ListChecks,
-} as const;
-const Glyph = glyphs[entry.collection];
 
 const searchText = [entry.data.title, description, ...entry.data.tags].join(' ').toLowerCase();
 ---
@@ -76,9 +67,14 @@ const searchText = [entry.data.title, description, ...entry.data.tags].join(' ')
         class={cn('h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]', featured && 'group-data-[view=grid]/list:sm:absolute group-data-[view=grid]/list:sm:inset-0')}
       />
     ) : (
-      <div class="bg-grid absolute inset-0 flex items-center justify-center bg-surface">
-        <Glyph class="size-10 text-subtle group-data-[view=list]/list:size-7" aria-hidden="true" />
-      </div>
+      <>
+        <div class="absolute inset-0 group-data-[view=list]/list:hidden">
+          <CoverFallback entry={entry} />
+        </div>
+        <div class="absolute inset-0 hidden group-data-[view=list]/list:block">
+          <CoverFallback entry={entry} compact />
+        </div>
+      </>
     )}
   </div>
 

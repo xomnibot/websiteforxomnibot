@@ -5,6 +5,8 @@ import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
 import SearchPalette from '@/components/search/SearchPalette';
 import { siteConfig } from '@/lib/site';
+import geistFont from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import geistMonoFont from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
 
 export interface Props {
   title: string;
@@ -37,6 +39,8 @@ const ogImageURL = new URL(image ?? '/og-default.png', Astro.site).toString();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="font" type="font/woff2" href={geistFont} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={geistMonoFont} crossorigin />
 
     <!-- Theme handling. Runs before first paint (no flash) and is kept in sync
          across <ClientRouter /> soft navigations: Astro swaps <html> attributes
@@ -136,7 +140,7 @@ const ogImageURL = new URL(image ?? '/og-default.png', Astro.site).toString();
 
     <ClientRouter />
   </head>
-  <body class="min-h-screen bg-bg font-sans text-fg antialiased selection:bg-accent selection:text-accent-fg">
+  <body class="min-h-screen bg-bg font-sans text-fg antialiased ">
     <a
       href="#main"
       class="sr-only z-50 rounded-lg border border-line bg-elevated px-4 py-2 text-sm text-fg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"

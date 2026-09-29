@@ -1,5 +1,5 @@
 ---
-/** Home hero: full-viewport intro with CTAs, an animated recon terminal, and a "currently" strip. */
+/** Home hero: full-viewport intro with CTAs, an interactive attack-path map, and a "currently" strip. */
 import Container from '@/components/ui/Container.astro';
 import Button from '@/components/ui/Button.astro';
 import BrandIcon from '@/components/ui/BrandIcon.astro';
@@ -20,20 +20,53 @@ const cut = amp > 0 ? amp + 1 : Math.ceil(words.length / 2);
 const headA = words.slice(0, cut).join(' ');
 const headB = words.slice(cut).join(' ');
 
-// Terminal script. `t` = seconds after load when the line starts.
-const lines: { kind: 'cmd' | 'out'; text: string; t: number; cls?: string }[] = [
-  { kind: 'cmd', text: 'nmap -sC -sV -p- 10.10.11.42', t: 0.6 },
-  { kind: 'out', text: '22/tcp   open  ssh     OpenSSH 8.9', t: 2.0 },
-  { kind: 'out', text: '80/tcp   open  http    nginx 1.18', t: 2.3 },
-  { kind: 'out', text: '445/tcp  open  smb     Samba 4.15', t: 2.6 },
-  { kind: 'cmd', text: 'gobuster dir -u http://target -w common.txt', t: 3.3 },
-  { kind: 'out', text: '/admin    (Status: 302)', t: 4.9 },
-  { kind: 'out', text: '/backup   (Status: 200)', t: 5.2 },
-  { kind: 'cmd', text: 'sudo -l', t: 5.9 },
-  { kind: 'out', text: '(root) NOPASSWD: /usr/bin/vim', t: 6.7 },
-  { kind: 'cmd', text: "sudo vim -c ':!/bin/sh'", t: 7.4 },
-  { kind: 'out', text: '# id → uid=0(root)', t: 8.9, cls: 'accent' },
+// Attack-path map data (viewBox 600x330). Chips are 104x38.
+type Node = { id: string; name: string; sub: string; x: number; y: number; icon: string; tip: [string, string]; decoy?: boolean };
+const ICONS: Record<string, string> = {
+  term: '<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  server: '<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/>',
+  db: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+  monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+};
+const nodes: Node[] = [
+  { id: 'kali', name: 'kali', sub: 'attacker', x: 63, y: 165, icon: 'term', tip: ['T1595', 'Active scanning'] },
+  { id: 'web01', name: 'web01', sub: ':80', x: 213, y: 60, icon: 'globe', tip: ['T1190', 'Exploit public-facing app'] },
+  { id: 'mail01', name: 'mail01', sub: ':25', x: 213, y: 270, icon: 'mail', tip: ['T1046', 'Scanned, dead end'], decoy: true },
+  { id: 'app01', name: 'app01', sub: ':8080', x: 387, y: 60, icon: 'server', tip: ['T1552.001', 'Credentials in files'] },
+  { id: 'ws01', name: 'ws01', sub: ':3389', x: 537, y: 60, icon: 'monitor', tip: ['T1021.001', 'Not on the path (clean)'], decoy: true },
+  { id: 'db01', name: 'db01', sub: ':1433', x: 387, y: 165, icon: 'db', tip: ['T1558.003', 'Kerberoasting'] },
+  { id: 'fs01', name: 'fs01', sub: ':445', x: 387, y: 270, icon: 'folder', tip: ['T1135', 'Share discovery, decoy'], decoy: true },
+  { id: 'dc01', name: 'dc01', sub: 'DC', x: 537, y: 165, icon: 'shield', tip: ['T1003.006', 'DCSync'] },
 ];
+const N = Object.fromEntries(nodes.map((n) => [n.id, n]));
+const H = (a: string, b: string) => {
+  const x1 = N[a].x + 56, y1 = N[a].y, x2 = N[b].x - 56, y2 = N[b].y, c = (x1 + x2) / 2;
+  return `M${x1} ${y1}C${c} ${y1} ${c} ${y2} ${x2} ${y2}`;
+};
+const V = (a: string, b: string) => `M${N[a].x} ${N[a].y + 21}L${N[b].x} ${N[b].y - 21}`;
+const edges = [
+  { id: 'kali-web01', d: H('kali', 'web01'), on: true },
+  { id: 'web01-app01', d: H('web01', 'app01'), on: true },
+  { id: 'app01-db01', d: V('app01', 'db01'), on: true },
+  { id: 'db01-dc01', d: H('db01', 'dc01'), on: true },
+  { id: 'kali-mail01', d: H('kali', 'mail01') },
+  { id: 'app01-ws01', d: H('app01', 'ws01') },
+  { id: 'mail01-fs01', d: H('mail01', 'fs01') },
+  { id: 'fs01-dc01', d: `M${N.fs01.x + 56} ${N.fs01.y}C${N.fs01.x + 100} ${N.fs01.y} ${N.dc01.x} ${N.dc01.y + 90} ${N.dc01.x} ${N.dc01.y + 21}` },
+];
+const steps = [
+  { e: 'kali-web01', n: 'web01', k: 'recon', t: 'nmap -sV web01 → 80/tcp open' },
+  { e: 'kali-web01', n: 'web01', k: 'exploit', t: 'command injection → shell as www-data' },
+  { e: 'web01-app01', n: 'app01', k: 'pivot', t: 'creds in config → app01' },
+  { e: 'app01-db01', n: 'db01', k: 'kerberoast', t: 'svc_sql hash cracked → db01' },
+  { e: 'db01-dc01', n: 'dc01', k: 'dcsync', t: 'dump krbtgt → dc01 ✓ domain admin' },
+];
+const ariaLabel =
+  'Attack path map of a small lab: from the kali attacker, web01 is exploited with command injection, credentials in a config file pivot to app01, svc_sql is kerberoasted to reach db01, and DCSync on dc01 gives domain admin. mail01, fs01 and ws01 are decoys.';
 ---
 
 <section class="hero relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden border-b border-line">
@@ -48,7 +81,7 @@ const lines: { kind: 'cmd' | 'out'; text: string; t: number; cls?: string }[] = 
           <span class="hero-dot size-1.5 rounded-full bg-accent"></span>
           {siteConfig.persona.handle} &middot; {siteConfig.persona.role}
         </p>
-        <h1 class="hero-rise mt-6 text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-fg sm:text-6xl xl:text-[4.25rem]" style="--d:.08s">
+        <h1 data-hero-title class="hero-rise mt-6 text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-fg sm:text-6xl xl:text-[4.25rem]" style="--d:.08s">
           {`${headA} `}<span class="hero-grad">{headB}</span>
         </h1>
         <p class="hero-rise mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg" style="--d:.16s">
@@ -73,23 +106,65 @@ const lines: { kind: 'cmd' | 'out'; text: string; t: number; cls?: string }[] = 
       </div>
 
       <div class="hero-rise min-w-0" style="--d:.2s">
-        <div class="overflow-hidden rounded-xl border border-line-strong bg-elevated shadow-lg shadow-black/5 dark:shadow-black/40">
-          <div class="flex items-center gap-2 border-b border-line bg-surface px-4 py-2.5">
-            <span class="size-2.5 rounded-full bg-red/70"></span>
-            <span class="size-2.5 rounded-full bg-amber/70"></span>
-            <span class="size-2.5 rounded-full bg-green/70"></span>
-            <span class="ml-2 truncate font-mono text-xs text-subtle">{siteConfig.persona.handle}@kali: ~/ctf</span>
-          </div>
-          <div class="hero-term h-[19rem] overflow-hidden px-4 py-4 font-mono text-[12px] leading-6 sm:h-[20rem] sm:text-[13px]" role="img" aria-label="Animated terminal showing a recon and privilege escalation sequence">
-            {
-              lines.map((l) => (
-                <div class:list={['hero-line whitespace-pre', l.kind === 'out' ? (l.cls === 'accent' ? 'text-accent' : 'text-muted') : 'text-fg']} style={`--t:${l.t}s`}>
-                  {l.kind === 'cmd' && <span class="text-accent">$ </span>}
-                  <span class={l.kind === 'cmd' ? 'hero-type' : ''} style={l.kind === 'cmd' ? `--n:${l.text.length}` : undefined}>{l.text}</span>
-                </div>
-              ))
-            }
-            <div class="hero-line" style="--t:9.4s"><span class="text-accent">$ </span><span class="hero-caret"></span></div>
+        <div class="hm-tilt" data-hm-tilt>
+          <div class="hm overflow-hidden rounded-2xl border border-line-strong bg-elevated shadow-lg shadow-black/5 dark:shadow-black/40" data-hm data-steps={steps.length}>
+            <div class="flex items-center justify-between gap-3 border-b border-line bg-surface px-3.5 py-2">
+              <span class="flex min-w-0 items-center gap-2 truncate font-mono text-[11px] text-subtle">
+                <span class="hm-live size-1.5 shrink-0 rounded-full bg-accent"></span>
+                lab-01 <span class="text-line-strong">/</span> attack-path
+              </span>
+              <span class="flex items-center gap-2.5 font-mono text-[11px] text-subtle">
+                <span data-hm-count aria-hidden="true">0/{steps.length}</span>
+                <button type="button" data-hm-replay class="hm-replay inline-flex items-center gap-1 rounded-md border border-line bg-elevated px-2 py-0.5 text-muted transition-colors hover:text-fg" aria-label="Replay attack path animation">
+                  <svg viewBox="0 0 24 24" class="size-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                  replay
+                </button>
+              </span>
+            </div>
+
+            <div class="hm-stage relative" data-hm-stage>
+              <div aria-hidden="true" class="hm-grid absolute inset-0"></div>
+              <div aria-hidden="true" class="hm-scan absolute inset-x-0 top-0"></div>
+              <svg viewBox="-16 -4 632 338" class="relative block h-auto w-full" role="img" aria-label={ariaLabel} data-hm-svg>
+                <g data-hm-fade>
+                  <g fill="none" stroke-linecap="round">
+                    {edges.map((e) => <path d={e.d} class={e.on ? 'hm-edge' : 'hm-edge hm-edge-decoy'} data-base={e.id} />)}
+                    {edges.filter((e) => e.on).map((e) => <path d={e.d} pathLength="1" class="hm-act" data-act={e.id} />)}
+                  </g>
+                  {
+                    nodes.map((n) => (
+                      <g class:list={['hm-node', n.decoy && 'is-decoy']} transform={`translate(${n.x} ${n.y})`} data-node={n.id} data-x={n.x} data-y={n.y} data-tid={n.tip[0]} data-tname={n.tip[1]} tabindex="0">
+                        <rect class="hm-ring" x="-59" y="-24" width="118" height="48" rx="14" />
+                        <rect class="hm-chip" x="-56" y="-21" width="112" height="42" rx="11" />
+                        <g class="hm-ico" transform="translate(-46 -9) scale(.75)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={ICONS[n.icon]} />
+                        <text class="hm-name" x="-22" y="-1.5">{n.name}</text>
+                        <text class="hm-sub" x="-22" y="12">{n.sub}</text>
+                        <circle class="hm-dot" cx="43" cy="0" r="3.2" />
+                        <g transform="translate(54 -21)"><g class="hm-badge">
+                          <circle r="8" />
+                          <path d="M-3.4 .2l2.3 2.3 4.4-4.8" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+                        </g></g>
+                      </g>
+                    ))
+                  }
+                  <g class="hm-pkt" data-hm-pkt>
+                    <circle r="9" class="hm-pkt-glow" />
+                    <circle r="3.4" class="hm-pkt-core" />
+                  </g>
+                </g>
+              </svg>
+              <div class="hm-tip" role="tooltip" data-hm-tip hidden><b></b><span></span></div>
+            </div>
+
+            <ol class="hm-caps border-t border-line bg-surface/60 px-3.5 py-2.5 font-mono text-[11.5px] leading-5 sm:text-xs" aria-label="Attack steps">
+              {
+                steps.map((s, i) => (
+                  <li class="hm-cap">
+                    <span class="text-subtle">[{i + 1}]</span> <span class="text-accent">{s.k}:</span> <span class="text-fg">{s.t}</span>
+                  </li>
+                ))
+              }
+            </ol>
           </div>
         </div>
 
@@ -141,28 +216,96 @@ const lines: { kind: 'cmd' | 'out'; text: string; t: number; cls?: string }[] = 
     animation: hero-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
     animation-delay: var(--d, 0s);
   }
-  .hero-line {
-    opacity: 0;
-    animation: hero-show 0.01s linear forwards;
-    animation-delay: var(--t);
+  .hm-tilt {
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.25s ease-out;
+    will-change: transform;
   }
-  .hero-type {
-    display: inline-block;
-    vertical-align: bottom;
-    overflow: hidden;
+  .hm-live { animation: hero-pulse 2.4s ease-out infinite; box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent); }
+  .hm-grid {
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: center;
+    opacity: 0.55;
+    -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 30%, transparent 100%);
+  }
+  .hm-scan {
+    height: 22%;
+    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--accent) 10%, transparent) 60%, transparent);
+    animation: hm-scan 5.5s linear infinite;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .hm[data-paused] .hm-scan, .hm[data-static] .hm-scan { animation-play-state: paused; opacity: 0; }
+  .hm-edge { stroke: var(--border-strong); stroke-width: 1.5; }
+  .hm-edge-decoy { stroke-dasharray: 3 5; opacity: 0.7; }
+  .hm-act { stroke: var(--accent); stroke-width: 2.25; stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .hm-pkt { opacity: 0; }
+  .hm-pkt-core { fill: var(--accent); }
+  .hm-pkt-glow { fill: var(--accent); opacity: 0.28; }
+  .hm-node { outline: none; cursor: default; }
+  .hm-chip { fill: var(--bg-elevated); stroke: var(--border-strong); stroke-width: 1; transition: stroke 0.3s, fill 0.3s; }
+  .hm-ring { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0; transition: opacity 0.35s; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 55%, transparent)); }
+  .hm-ico { stroke: var(--fg-muted); transition: stroke 0.3s; }
+  .hm-name { fill: var(--fg); font: 600 13.5px var(--font-mono); }
+  .hm-sub { fill: var(--fg-subtle); font: 400 10px var(--font-mono); }
+  .hm-dot { fill: var(--fg-subtle); opacity: 0.6; transition: fill 0.3s; }
+  .hm-badge { opacity: 0; transform: scale(0.4); transform-box: fill-box; transform-origin: center; transition: opacity 0.3s, transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .hm-badge circle { fill: var(--accent); }
+  .hm-badge path { stroke: var(--accent-fg); }
+  .is-decoy .hm-chip { stroke-dasharray: 3 3; }
+  .is-decoy { opacity: 0.72; }
+  .hm-node[data-node='kali'] .hm-chip { stroke: var(--accent-2); }
+  .hm-node[data-node='kali'] .hm-ico { stroke: var(--accent-2); }
+  .hm-node[data-node='kali'] .hm-dot { fill: var(--accent-2); opacity: 1; }
+  .hm-node:hover .hm-chip, .hm-node:focus-visible .hm-chip { stroke: var(--fg-muted); }
+  .hm-node:focus-visible .hm-ring { stroke: var(--accent-2); opacity: 1; }
+  .hm-node.is-scan .hm-chip { stroke: var(--accent-2); }
+  .hm-node.is-pwn .hm-chip { stroke: var(--accent); fill: color-mix(in srgb, var(--accent) 9%, var(--bg-elevated)); }
+  .hm-node.is-pwn .hm-ring { opacity: 0.55; }
+  .hm-node.is-pwn .hm-ico { stroke: var(--accent); }
+  .hm-node.is-pwn .hm-dot { fill: var(--accent); opacity: 1; }
+  .hm-node.is-pwn .hm-badge { opacity: 1; transform: none; }
+  .hm-tip {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
     white-space: nowrap;
-    width: 0;
-    animation: hero-typing calc(var(--n) * 0.035s) steps(var(--n), end) forwards;
-    animation-delay: var(--t);
+    padding: 5px 9px;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+    box-shadow: 0 6px 20px -6px rgb(0 0 0 / 0.25);
+    font: 500 11px/1.35 var(--font-mono);
+    color: var(--fg);
   }
-  .hero-caret {
-    display: inline-block;
-    width: 0.55em;
-    height: 1.1em;
-    vertical-align: text-bottom;
-    background: var(--fg-muted);
-    animation: hero-blink 1s steps(1) infinite;
+  .hm-tip[hidden] { display: none; }
+  .hm-tip b { color: var(--accent); font-weight: 600; }
+  .hm-tip span { color: var(--fg-muted); }
+  .hm-caps { display: grid; min-height: 3.2rem; align-content: start; }
+  .hm-cap { grid-area: 1 / 1; opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; overflow-wrap: anywhere; }
+  .hm-cap.on { opacity: 1; transform: none; }
+  .hm[data-static] .hm-caps { display: block; min-height: 0; }
+  .hm[data-static] .hm-cap { opacity: 1; transform: none; }
+  .hm[data-static] [data-hm-replay] { display: none; }
+  .hm:not([data-live]) .hm-cap { opacity: 1; transform: none; }
+  .hm:not([data-live]) .hm-caps { display: block; min-height: 0; }
+  .hm:not([data-live]) [data-hm-replay] { display: none; }
+  @media (max-width: 639px) {
+    .hm-name { font-size: 17px; }
+    .hm-sub { display: none; }
+    .hm-name { transform: translateY(6px); }
+    .hm-tip { font-size: 10.5px; }
   }
+  .hero-title-glyph { display: inline-block; text-align: center; }
+  .hero-title-glyph.is-scr { opacity: 0.55; }
+  @keyframes hm-scan { from { transform: translateY(-100%); } to { transform: translateY(450%); } }
   .hero-cue {
     animation: hero-bob 2.2s ease-in-out infinite;
   }
@@ -180,19 +323,245 @@ const lines: { kind: 'cmd' | 'out'; text: string; t: number; cls?: string }[] = 
     100% { box-shadow: 0 0 0 0 transparent; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-orb, .hero-dot, .hero-rise, .hero-cue, .hero-caret { animation: none; }
-    .hero-line { animation: none; opacity: 1; }
-    .hero-type { animation: none; width: auto; }
+    .hero-orb, .hero-dot, .hero-rise, .hero-cue { animation: none; }
+    .hm-scan, .hm-live { animation: none; }
+    .hm-tilt { transition: none; }
   }
 </style>
 
 <script>
+  const SC = [0.6, 2.4, 4.6, 6.8, 9.0]; // step start times (s)
+  const SD = [1.1, 0.9, 1.3, 1.3, 1.5]; // travel durations
+  const RESET = 11.4;
+  const END = 12.2;
+  const clamp = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const ease = (p: number) => (p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2);
+  const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let dispose: (() => void) | null = null;
+
+  function scramble(h: HTMLElement): () => void {
+    const orig = h.cloneNode(true) as HTMLElement;
+    const glyphs: HTMLElement[] = [];
+    const walk = (el: Node) => {
+      for (const c of Array.from(el.childNodes)) {
+        if (c.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          for (const part of (c.textContent || '').split(/(\s+)/)) {
+            if (!part) continue;
+            if (/^\s+$/.test(part)) { frag.append(part); continue; }
+            const w = document.createElement('span');
+            w.style.cssText = 'display:inline-block;white-space:nowrap';
+            for (const ch of part) {
+              const g = document.createElement('span');
+              g.className = 'hero-title-glyph';
+              g.dataset.c = ch;
+              g.textContent = ch;
+              w.append(g);
+              glyphs.push(g);
+            }
+            frag.append(w);
+          }
+          c.replaceWith(frag);
+        } else if (c.nodeType === 1) walk(c);
+      }
+    };
+    walk(h);
+    const widths = glyphs.map((g) => g.getBoundingClientRect().width);
+    glyphs.forEach((g, i) => (g.style.width = widths[i] + 'px'));
+    const set = '01#$%&<>/{}[]*+=?abcdefx';
+    const n = glyphs.length;
+    const total = 850;
+    const t0 = performance.now() + 120;
+    let raf = 0;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      cancelAnimationFrame(raf);
+      if (h.isConnected) h.replaceChildren(...Array.from(orig.childNodes));
+    };
+    const tick = (now: number) => {
+      const e = now - t0;
+      glyphs.forEach((g, i) => {
+        const at = (i / n) * total * 0.7 + (i % 3) * 40 + 120;
+        const ok = e >= at;
+        g.textContent = ok ? g.dataset.c! : set[(Math.random() * set.length) | 0];
+        g.classList.toggle('is-scr', !ok);
+      });
+      if (e >= total + 200) finish();
+      else raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return finish;
+  }
+
+  function initMap(root: HTMLElement): () => void {
+    const q = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+    const svg = q<SVGSVGElement>('[data-hm-svg]');
+    const stage = q<HTMLElement>('[data-hm-stage]');
+    const fade = q<SVGGElement>('[data-hm-fade]');
+    const pkt = q<SVGGElement>('[data-hm-pkt]');
+    const tip = q<HTMLElement>('[data-hm-tip]');
+    const count = q<HTMLElement>('[data-hm-count]');
+    const replay = q<HTMLButtonElement>('[data-hm-replay]');
+    const caps = Array.from(root.querySelectorAll<HTMLElement>('.hm-cap'));
+    const nodes = new Map<string, SVGGElement>();
+    svg.querySelectorAll<SVGGElement>('[data-node]').forEach((n) => nodes.set(n.dataset.node!, n));
+    const acts = new Map<string, SVGPathElement>();
+    svg.querySelectorAll<SVGPathElement>('[data-act]').forEach((n) => acts.set(n.dataset.act!, n));
+    const bases = new Map<string, SVGPathElement>();
+    svg.querySelectorAll<SVGPathElement>('[data-base]').forEach((n) => bases.set(n.dataset.base!, n));
+    const steps = [
+      ['kali-web01', 'web01'], ['kali-web01', 'web01'], ['web01-app01', 'app01'], ['app01-db01', 'db01'], ['db01-dc01', 'dc01'],
+    ];
+    const lens = new Map<string, number>();
+    bases.forEach((p, k) => lens.set(k, p.getTotalLength()));
+
+    const cleanups: (() => void)[] = [];
+    const on = (el: EventTarget, ev: string, fn: (e: any) => void, o?: AddEventListenerOptions) => {
+      el.addEventListener(ev, fn, o);
+      cleanups.push(() => el.removeEventListener(ev, fn, o));
+    };
+
+    let capIdx = -2;
+    const pwn = new Map<string, number>(); // node -> 0 none, 1 scan, 2 pwn
+    function render(t: number) {
+      let pk = -1;
+      let cur = -1;
+      const state = new Map<string, number>();
+      steps.forEach(([e, n], i) => {
+        const p = clamp((t - SC[i]) / SD[i]);
+        if (t >= SC[i]) cur = i;
+        if (i !== 1) acts.get(e)!.style.strokeDashoffset = String(1 - ease(p));
+        if (p > 0 && p < 1) pk = i;
+        if (p >= 1) state.set(n, Math.max(state.get(n) || 0, i === 0 ? 1 : 2));
+      });
+      nodes.forEach((g, id) => {
+        const s = state.get(id) || 0;
+        if (pwn.get(id) !== s) {
+          pwn.set(id, s);
+          g.classList.toggle('is-scan', s === 1);
+          g.classList.toggle('is-pwn', s === 2);
+        }
+      });
+      if (pk >= 0) {
+        const [e] = steps[pk];
+        const p = ease(clamp((t - SC[pk]) / SD[pk]));
+        const path = bases.get(e)!;
+        const pt = path.getPointAtLength(lens.get(e)! * p);
+        pkt.setAttribute('transform', `translate(${pt.x} ${pt.y})`);
+        pkt.style.opacity = '1';
+      } else pkt.style.opacity = '0';
+      if (cur !== capIdx) {
+        capIdx = cur;
+        caps.forEach((c, i) => c.classList.toggle('on', i === cur));
+        count.textContent = `${cur + 1}/${steps.length}`;
+      }
+      const f = t < 0.4 ? t / 0.4 : t > RESET ? Math.max(0, 1 - (t - RESET) / 0.6) : 1;
+      fade.style.opacity = String(f);
+    }
+
+    if (reduced()) {
+      root.dataset.static = '';
+      root.dataset.live = '';
+      acts.forEach((a) => (a.style.strokeDashoffset = '0'));
+      render(SC[4] + SD[4] + 0.1);
+      count.textContent = `${steps.length}/${steps.length}`;
+    } else {
+      root.dataset.live = '';
+      let t = 0;
+      let raf = 0;
+      let last = 0;
+      let visible = true;
+      const frame = (now: number) => {
+        t += Math.min((now - last) / 1000, 0.1);
+        last = now;
+        if (t >= END) { t -= END; capIdx = -2; }
+        render(t);
+        raf = requestAnimationFrame(frame);
+      };
+      const sync = () => {
+        const run = visible && !document.hidden;
+        if (run && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+        else if (!run && raf) { cancelAnimationFrame(raf); raf = 0; }
+        if (run) root.removeAttribute('data-paused'); else root.setAttribute('data-paused', '');
+      };
+      const io = new IntersectionObserver((es) => { visible = es[es.length - 1].isIntersecting; sync(); });
+      io.observe(root);
+      cleanups.push(() => { io.disconnect(); cancelAnimationFrame(raf); raf = 0; });
+      on(document, 'visibilitychange', sync);
+      on(replay, 'click', () => { t = 0; capIdx = -2; render(0); sync(); });
+      render(0);
+      sync();
+    }
+
+    // Tooltip (hover + keyboard focus).
+    const showTip = (g: SVGGElement) => {
+      tip.querySelector('b')!.textContent = g.dataset.tid!;
+      tip.querySelector('span')!.textContent = g.dataset.tname!;
+      tip.hidden = false;
+      const W = stage.clientWidth;
+      // Map SVG user units to pixels; keep in sync with the viewBox (-16 -4 632 338).
+      const k = W / 632;
+      const x = (+g.dataset.x! + 16) * k;
+      const y = +g.dataset.y! + 4;
+      const w = tip.offsetWidth;
+      tip.style.left = Math.max(4, Math.min(W - w - 4, x - w / 2)) + 'px';
+      tip.style.top = (y < 100 ? (y + 24) * k : (y - 24) * k - tip.offsetHeight) + 'px';
+    };
+    nodes.forEach((g) => {
+      on(g, 'pointerenter', () => showTip(g));
+      on(g, 'focus', () => showTip(g));
+      on(g, 'pointerleave', () => (tip.hidden = true));
+      on(g, 'blur', () => (tip.hidden = true));
+    });
+
+    return () => cleanups.forEach((f) => f());
+  }
+
+  function initTilt(hero: HTMLElement): () => void {
+    const el = hero.querySelector<HTMLElement>('[data-hm-tilt]');
+    if (!el || reduced() || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return () => {};
+    let raf = 0;
+    let ev: PointerEvent | null = null;
+    const apply = () => {
+      raf = 0;
+      if (!ev) { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); return; }
+      const r = el.getBoundingClientRect();
+      const nx = Math.max(-1, Math.min(1, (ev.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+      const ny = Math.max(-1, Math.min(1, (ev.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+      el.style.setProperty('--ry', (nx * 6).toFixed(2) + 'deg');
+      el.style.setProperty('--rx', (-ny * 6).toFixed(2) + 'deg');
+    };
+    const move = (e: PointerEvent) => { ev = e; if (!raf) raf = requestAnimationFrame(apply); };
+    const leave = () => { ev = null; if (!raf) raf = requestAnimationFrame(apply); };
+    hero.addEventListener('pointermove', move);
+    hero.addEventListener('pointerleave', leave);
+    return () => {
+      cancelAnimationFrame(raf);
+      hero.removeEventListener('pointermove', move);
+      hero.removeEventListener('pointerleave', leave);
+    };
+  }
+
   document.addEventListener('astro:page-load', () => {
+    dispose?.();
+    dispose = null;
     const btn = document.querySelector<HTMLButtonElement>('[data-hero-scroll]');
     if (!btn) return;
-    btn.addEventListener('click', () => {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      window.scrollBy({ top: window.innerHeight * 0.85, behavior: reduce ? 'auto' : 'smooth' });
-    });
+    const onScroll = () => window.scrollBy({ top: window.innerHeight * 0.85, behavior: reduced() ? 'auto' : 'smooth' });
+    btn.addEventListener('click', onScroll);
+    const hero = btn.closest<HTMLElement>('.hero')!;
+    const fns: (() => void)[] = [() => btn.removeEventListener('click', onScroll)];
+    const map = hero.querySelector<HTMLElement>('[data-hm]');
+    if (map) fns.push(initMap(map));
+    fns.push(initTilt(hero));
+    const h1 = hero.querySelector<HTMLElement>('[data-hero-title]');
+    if (h1 && !reduced()) fns.push(scramble(h1));
+    dispose = () => fns.forEach((f) => f());
+  });
+  document.addEventListener('astro:before-swap', () => {
+    dispose?.();
+    dispose = null;
   });
 </script>

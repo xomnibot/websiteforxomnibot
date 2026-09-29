@@ -1,0 +1,18 @@
+---
+/** One phase of the engagement: anchored section with hairline divider and optional alternate background. */
+import Container from '@/components/ui/Container.astro';
+import { cn } from '@/lib/utils';
+
+interface Props {
+  id: string;
+  alt?: boolean;
+  class?: string;
+  /** Skip the Container so the slot can go full-bleed. */
+  bleed?: boolean;
+}
+const { id, alt = false, class: className, bleed = false } = Astro.props;
+---
+
+<section id={id} data-phase={id} class={cn('relative scroll-mt-0 border-t border-line py-20 sm:py-24 lg:py-32', alt ? 'bg-surface' : 'bg-bg', className)}>
+  {bleed ? <slot /> : <Container><slot /></Container>}
+</section>

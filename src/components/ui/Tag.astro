@@ -13,7 +13,7 @@ const { tag, class: className } = Astro.props;
 <a
   href={`/tags/${slugify(tag)}`}
   class={cn(
-    'inline-flex items-center rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-xs text-muted transition-colors hover:border-accent/40 hover:text-accent',
+    'inline-flex items-center rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-xs leading-5 text-muted transition-colors hover:border-accent/40 hover:text-accent',
     className,
   )}
 >

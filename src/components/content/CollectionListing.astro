@@ -30,7 +30,7 @@ const entries = await getPublished(collection);
       <TerminalPrompt path={`~${meta.href}`} />
       <SectionHeading eyebrow={meta.eyebrow} title={meta.label} description={meta.description} />
       <p class="font-mono text-xs text-subtle">
-        <span data-result-count>{entries.length}</span> {meta.label.toLowerCase()}
+        <span data-result-count>{entries.length}</span> {entries.length === 1 ? meta.singular.toLowerCase() : meta.label.toLowerCase()}
       </p>
     </div>
 

@@ -1,15 +1,16 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Container from '@/components/ui/Container.astro';
-import SectionHeading from '@/components/ui/SectionHeading.astro';
 import Hero from '@/components/home/Hero.astro';
-import StatsRow from '@/components/home/StatsRow.astro';
-import FeaturedGrid from '@/components/home/FeaturedGrid.astro';
-import LatestList from '@/components/home/LatestList.astro';
-import CollectionTiles from '@/components/home/CollectionTiles.astro';
-import ClosingCta from '@/components/home/ClosingCta.astro';
+import Reveal from '@/components/home/Reveal.astro';
+import PhaseRail from '@/components/home/PhaseRail.astro';
+import PhaseSection from '@/components/home/PhaseSection.astro';
+import Enumerate from '@/components/home/Enumerate.astro';
+import Exploit from '@/components/home/Exploit.astro';
+import Escalate from '@/components/home/Escalate.astro';
+import Persist from '@/components/home/Persist.astro';
+import Exfil from '@/components/home/Exfil.astro';
 import { siteConfig } from '@/lib/site';
-import { getPublished, getAllPublished, type CollectionKey } from '@/lib/collections';
+import { getPublished, getAllPublished, type CollectionKey, type AnyEntry } from '@/lib/collections';
 import { COLLECTIONS } from '@/lib/schemas';
 
 const [allEntries, ...perCollection] = await Promise.all([
@@ -23,49 +24,29 @@ const counts = Object.fromEntries(COLLECTIONS.map((c, i) => [c, perCollection[i]
 
 const tagCount = new Set(allEntries.flatMap((e) => e.data.tags ?? [])).size;
 const stats = [
-  { label: 'Writeups published', value: String(counts.writeups) },
-  { label: 'Posts in total', value: String(allEntries.length) },
-  { label: 'Topics covered', value: String(tagCount) },
+  { label: 'Writeups published', value: String(counts.writeups), count: true },
+  { label: 'Posts in total', value: String(allEntries.length), count: true },
+  { label: 'Topics covered', value: String(tagCount), count: true },
   { label: 'Hacking since', value: '2023' },
 ];
 
-const featured = allEntries.filter((e) => e.data.featured).slice(0, 3);
+// "Boxes I've broken" is writeups only: featured writeups first, then the newest ones.
+const writeups = perCollection[COLLECTIONS.indexOf('writeups')] as AnyEntry[];
+const featured: AnyEntry[] = writeups.filter((e) => e.data.featured).slice(0, 3);
+for (const w of writeups) {
+  if (featured.length >= 3) break;
+  if (!featured.includes(w)) featured.push(w);
+}
 const latest = allEntries.slice(0, 6);
-const pageTitle = `${siteConfig.name} — ${siteConfig.tagline}`;
 ---
 
-<BaseLayout title={pageTitle} description={siteConfig.description}>
-  <Hero />
-
-  <Container class="py-12 sm:py-16">
-    <StatsRow stats={stats} />
-  </Container>
-
-  {
-    featured.length > 0 && (
-      <Container class="pb-20 sm:pb-28">
-        <SectionHeading
-          eyebrow="// featured"
-          title="Start here"
-          description="Selected writeups, research and tools."
-          class="mb-8"
-        />
-        <FeaturedGrid entries={featured} />
-      </Container>
-    )
-  }
-
-  <Container class="pb-20 sm:pb-28">
-    <SectionHeading eyebrow="// latest" title="Latest posts" class="mb-8" />
-    <LatestList entries={latest} />
-  </Container>
-
-  <Container class="pb-20 sm:pb-28">
-    <SectionHeading eyebrow="// explore" title="Explore by topic" class="mb-8" />
-    <CollectionTiles counts={counts} />
-  </Container>
-
-  <Container class="pb-20 sm:pb-28">
-    <ClosingCta />
-  </Container>
+<BaseLayout title={siteConfig.name} description={siteConfig.description}>
+  <PhaseRail />
+  <Reveal />
+  <section id="recon" data-phase="recon"><Hero /></section>
+  <PhaseSection id="enumerate" alt bleed><Enumerate stats={stats} /></PhaseSection>
+  {featured.length > 0 && <PhaseSection id="exploit"><Exploit entries={featured} /></PhaseSection>}
+  <PhaseSection id="escalate" alt><Escalate /></PhaseSection>
+  <PhaseSection id="persist"><Persist entries={latest} counts={counts} /></PhaseSection>
+  <PhaseSection id="exfil" alt><Exfil /></PhaseSection>
 </BaseLayout>

@@ -1,0 +1,94 @@
+---
+/**
+ * Scroll-reveal + stat count-up for the home page. Mark elements with
+ * `data-reveal` (siblings stagger automatically) and numbers with
+ * `data-countup`. Content is only hidden once the script has set
+ * `data-reveal-js` on <html>, so without JS (or with reduced motion) nothing
+ * is ever hidden and count-up numbers already show their final value.
+ * Transform/opacity only => no layout shift. Re-inits on astro:page-load.
+ */
+---
+
+<script>
+  let observer: IntersectionObserver | null = null;
+
+  function animateCount(el: HTMLElement) {
+    const target = Number(el.dataset.countup);
+    if (!Number.isFinite(target) || target <= 0) return;
+    const start = performance.now();
+    const dur = 900;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = String(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = String(target);
+    };
+    el.textContent = '0';
+    requestAnimationFrame(tick);
+  }
+
+  function initReveal() {
+    observer?.disconnect();
+    observer = null;
+    const root = document.documentElement;
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    const counts = Array.from(document.querySelectorAll<HTMLElement>('[data-countup]'));
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window) || (items.length === 0 && counts.length === 0)) {
+      root.removeAttribute('data-reveal-js');
+      return;
+    }
+    root.setAttribute('data-reveal-js', '');
+
+    // Stagger: index among revealable siblings, capped so long lists don't drag.
+    items.forEach((el) => {
+      const sibs = Array.from(el.parentElement?.children ?? []).filter((c) => (c as HTMLElement).hasAttribute('data-reveal'));
+      el.style.setProperty('--reveal-delay', `${Math.min(sibs.indexOf(el), 5) * 70}ms`);
+    });
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting && entry.boundingClientRect.top >= 0) continue;
+          const el = entry.target as HTMLElement;
+          observer?.unobserve(el);
+          if (el.hasAttribute('data-countup')) animateCount(el);
+          if (el.hasAttribute('data-reveal')) {
+            el.classList.add('is-in');
+            // Hand the element back to its normal hover/transition styles.
+            window.setTimeout(() => {
+              el.removeAttribute('data-reveal');
+              el.classList.remove('is-in');
+              el.style.removeProperty('--reveal-delay');
+            }, 1000);
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+    );
+    items.forEach((el) => observer!.observe(el));
+    counts.forEach((el) => observer!.observe(el));
+  }
+
+  initReveal();
+  document.addEventListener('astro:page-load', initReveal);
+  document.addEventListener('astro:before-swap', () => {
+    observer?.disconnect();
+    observer = null;
+  });
+</script>
+
+<style is:global>
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-reveal-js] [data-reveal]:not(.is-in) {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    html[data-reveal-js] [data-reveal] {
+      transition:
+        opacity 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+        transform 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+    }
+  }
+</style>

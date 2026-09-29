@@ -10,7 +10,7 @@ interface Props {
 const { path = '~', class: className } = Astro.props;
 ---
 
-<p class={cn('flex flex-wrap items-center gap-0.5 font-mono text-xs text-subtle', className)}>
+<p class={cn('flex flex-wrap items-center gap-0.5 font-mono text-xs leading-5 tracking-normal text-subtle', className)}>
   <span class="text-accent">xomnibot</span><span>@</span><span class="text-accent-2">lab</span><span
     >:</span
   ><span class="text-muted">{path}</span><span class="text-accent">$</span>

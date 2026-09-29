@@ -1,0 +1,90 @@
+---
+/** 04 // PERSIST: newest posts as a log tail, plus a per-collection topic panel. */
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import type { AnyEntry, CollectionKey } from '@/lib/collections';
+import { collectionMeta, entryHref, entryReadingTime } from '@/lib/collections';
+import { COLLECTIONS } from '@/lib/schemas';
+import { ArrowRight } from '@lucide/astro';
+import { phaseLabel } from './phases';
+
+interface Props {
+  entries: AnyEntry[];
+  counts: Record<CollectionKey, number>;
+}
+const { entries, counts } = Astro.props;
+
+const tagTone: Record<CollectionKey, string> = {
+  writeups: 'text-green',
+  research: 'text-red',
+  projects: 'text-blue',
+  blog: 'text-amber',
+  cheatsheets: 'text-accent',
+};
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<div data-reveal>
+  <SectionHeading
+    eyebrow={phaseLabel('persist')}
+    title="Latest from the lab"
+    description="The newest posts across every collection, most recent first."
+  />
+</div>
+
+<div class="mt-10 grid gap-8 lg:grid-cols-[1fr_18rem] lg:gap-10">
+  <div data-reveal class="overflow-hidden rounded-xl border border-line bg-elevated">
+    <div class="flex items-center gap-2 border-b border-line bg-surface px-4 py-2.5">
+      <span aria-hidden="true" class="size-2.5 rounded-full bg-line-strong"></span>
+      <span aria-hidden="true" class="size-2.5 rounded-full bg-line-strong"></span>
+      <span aria-hidden="true" class="size-2.5 rounded-full bg-line-strong"></span>
+      <span class="ml-2 font-mono text-xs text-subtle">tail -n {entries.length} ~/lab/posts.log</span>
+    </div>
+    <ul class="divide-y divide-line">
+      {
+        entries.map((e) => (
+          <li>
+            <a
+              href={entryHref(e)}
+              class="group grid items-baseline gap-x-4 gap-y-1 border-l-2 border-transparent px-4 py-3.5 transition-colors hover:border-accent hover:bg-surface focus-visible:border-accent focus-visible:bg-surface focus-visible:outline-none sm:grid-cols-[6.5rem_6.5rem_1fr_auto]"
+            >
+              <time datetime={iso(e.data.date)} class="font-mono text-xs text-subtle">{iso(e.data.date)}</time>
+              <span class:list={['font-mono text-xs font-medium uppercase tracking-wider', tagTone[e.collection]]}>
+                [{collectionMeta[e.collection].singular.replace(' ', '')}]
+              </span>
+              <span class="font-medium text-fg transition-colors group-hover:text-accent">{e.data.title}</span>
+              <span class="flex items-center gap-1.5 font-mono text-xs text-subtle">
+                <span class="hidden sm:inline">→</span>
+                {entryReadingTime(e)}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <aside data-reveal class="self-start rounded-xl border border-line bg-elevated p-5">
+    <p class="eyebrow text-muted">Explore by topic</p>
+    <ul class="mt-3 divide-y divide-line">
+      {
+        COLLECTIONS.map((c) => (
+          <li>
+            <a
+              href={collectionMeta[c].href}
+              class="group flex min-h-11 items-center justify-between gap-3 py-2.5 text-sm text-fg transition-colors hover:text-accent"
+            >
+              <span class="flex items-center gap-2">
+                <span aria-hidden="true" class:list={['size-1.5 rounded-full bg-current', tagTone[c]]} />
+                {collectionMeta[c].label}
+              </span>
+              <span class="flex items-center gap-2 font-mono text-xs text-subtle">
+                {counts[c]}
+                <ArrowRight class="size-3.5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </aside>
+</div>

@@ -23,18 +23,18 @@ const {
 } = Astro.props;
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50';
+  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium tracking-[-0.005em] transition-[color,background-color,border-color,box-shadow,transform] duration-150 active:translate-y-px disabled:pointer-events-none disabled:opacity-50';
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-accent-fg hover:opacity-90',
-  secondary: 'border border-line-strong bg-elevated text-fg hover:border-accent/50 hover:bg-surface',
+  primary: 'bg-accent text-accent-fg shadow-sm hover:brightness-110 dark:hover:brightness-105',
+  secondary: 'border border-line-strong bg-elevated text-fg shadow-sm hover:border-accent/50 hover:bg-surface',
   ghost: 'text-fg hover:bg-surface',
 };
 
 const sizes: Record<ButtonSize, string> = {
   sm: 'h-8 px-3 text-sm',
   md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-6 text-base',
+  lg: 'h-12 px-6 text-[0.9375rem]',
 };
 
 const classes = cn(base, variants[variant], sizes[size], className);

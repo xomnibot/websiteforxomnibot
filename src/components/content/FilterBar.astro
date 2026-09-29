@@ -62,7 +62,7 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
     data-filter-text
     placeholder="Search title, description, tags..."
     aria-label={`Search ${collection}`}
-    class="min-w-0 flex-1 rounded-lg border border-line bg-elevated px-3.5 py-2.5 text-sm text-fg placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    class="min-w-0 flex-1 rounded-lg border border-line bg-elevated px-3.5 min-h-11 py-2.5 text-sm text-fg placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
   />
   <ViewToggle />
   </div>
@@ -70,7 +70,7 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
   {visibleGroups.length > 0 && (
     <div class="space-y-3">
       {visibleGroups.map((group) => (
-        <div class="flex flex-wrap items-center gap-2" role="group" aria-label={group.label}>
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-2.5" role="group" aria-label={group.label}>
           <span class="font-mono text-xs uppercase tracking-widest text-subtle">{group.label}</span>
           {group.values.map((value) => (
             <button
@@ -78,7 +78,7 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
               data-filter-group={group.key}
               data-filter-value={value}
               aria-pressed="false"
-              class="rounded-md border border-line bg-surface px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/40 hover:text-fg aria-pressed:border-accent/50 aria-pressed:bg-accent/10 aria-pressed:text-accent"
+              class="inline-flex min-h-10 items-center rounded-md border border-line bg-surface px-3 py-1 font-mono text-xs sm:min-h-0 sm:px-2.5 text-muted transition-colors hover:border-accent/40 hover:text-fg focus-visible:outline-2 focus-visible:outline-accent aria-pressed:border-accent/50 aria-pressed:bg-accent/10 aria-pressed:text-accent"
             >
               {value}
             </button>
@@ -93,7 +93,7 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
     data-filter-clear
     data-filter-clear-inline
     hidden
-    class="inline-flex items-center gap-1.5 font-mono text-xs text-subtle transition-colors hover:text-accent"
+    class="inline-flex min-h-10 items-center gap-1.5 font-mono text-xs text-muted transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-accent sm:min-h-0"
   >
     <X class="size-3.5" /> Clear filters
   </button>

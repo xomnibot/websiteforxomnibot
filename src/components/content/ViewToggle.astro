@@ -11,14 +11,14 @@ interface Props {
 }
 const { class: className } = Astro.props;
 const btn =
-  'inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-accent aria-pressed:bg-elevated aria-pressed:text-accent aria-pressed:shadow-sm aria-pressed:ring-1 aria-pressed:ring-line-strong';
+  'inline-flex size-10 items-center sm:size-8 justify-center rounded-md text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-accent aria-pressed:bg-elevated aria-pressed:text-accent aria-pressed:shadow-sm aria-pressed:ring-1 aria-pressed:ring-line-strong';
 ---
 
 <div
   data-view-toggle
   role="group"
   aria-label="Layout"
-  class:list={['inline-flex shrink-0 items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5', className]}
+  class:list={['inline-flex shrink-0 items-center gap-0.5  rounded-lg border border-line bg-surface p-0.5 ', className]}
 >
   <button type="button" data-view-option="grid" aria-pressed="true" aria-label="Card view" title="Card view" class={btn}>
     <LayoutGrid class="size-4" aria-hidden="true" />

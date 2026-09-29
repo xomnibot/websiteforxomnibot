@@ -36,7 +36,7 @@ const socialLinks = [
           </a>
         </div>
         <div class="mt-4 flex flex-wrap gap-2">
-          <Button href={`mailto:${siteConfig.socials.email}`} variant="primary" size="sm">
+          <Button href={`mailto:${siteConfig.socials.email}`} variant="primary">
             <Mail class="size-3.5" />
             Send an email
           </Button>
@@ -44,7 +44,7 @@ const socialLinks = [
             type="button"
             data-email={siteConfig.socials.email}
             onclick="window.__copyEmail(this)"
-            class="inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-line-strong bg-elevated px-3 text-sm text-fg transition-colors hover:border-accent/50 hover:bg-surface"
+            class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line-strong bg-elevated px-4 text-sm text-fg transition-colors hover:border-accent/50 hover:bg-surface"
           >
             <Copy class="size-3.5" />
             <span data-copy-label>Copy address</span>

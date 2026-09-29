@@ -1,0 +1,82 @@
+---
+/** 05 // EXFIL: contact panel with email, copy-email and social links. */
+import Button from '@/components/ui/Button.astro';
+import BrandIcon from '@/components/ui/BrandIcon.astro';
+import { siteConfig } from '@/lib/site';
+import { Mail, Copy, Check } from '@lucide/astro';
+import { phaseLabel } from './phases';
+
+const socials = [
+  { href: siteConfig.socials.github, label: 'GitHub', brand: 'github' as const },
+  { href: siteConfig.socials.linkedin, label: 'LinkedIn', brand: 'linkedin' as const },
+  { href: siteConfig.socials.youtube, label: 'YouTube', brand: 'youtube' as const },
+  { href: siteConfig.socials.instagram, label: 'Instagram', brand: 'instagram' as const },
+];
+const email = siteConfig.socials.email;
+---
+
+<div data-reveal class="relative overflow-hidden rounded-2xl border border-line bg-elevated px-6 py-14 text-center sm:px-12 sm:py-20">
+  <div aria-hidden="true" class="bg-grid bg-glow pointer-events-none absolute inset-0"></div>
+  <div class="relative mx-auto max-w-2xl">
+    <p class="eyebrow text-accent">{phaseLabel('exfil')}</p>
+    <h2 class="mt-3 text-3xl font-semibold leading-tight tracking-[-0.03em] text-fg sm:text-4xl">Exfiltrate a message</h2>
+    <p class="mx-auto mt-4 max-w-xl text-muted sm:text-lg">
+      Questions about a writeup, a CTF team invite, an internship — my inbox is open.
+    </p>
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <Button href={`mailto:${email}`} size="lg">
+        <Mail class="size-4" />
+        Email me
+      </Button>
+      <button
+        type="button"
+        data-copy-email={email}
+        class="inline-flex h-12 items-center gap-2 rounded-lg border border-line-strong bg-bg/60 px-4 font-mono text-sm text-muted transition-colors hover:border-accent/50 hover:text-fg"
+        aria-label={`Copy email address ${email}`}
+      >
+        <span data-copy-idle class="inline-flex items-center gap-2"><Copy class="size-4" />{email}</span>
+        <span data-copy-done hidden class="inline-flex items-center gap-2 text-accent"><Check class="size-4" />copied</span>
+      </button>
+    </div>
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+      {
+        socials.map((x) => (
+          <Button href={x.href} target="_blank" rel="noreferrer" variant="secondary" class="!h-11">
+            <BrandIcon name={x.brand} class="size-4" />
+            {x.label}
+          </Button>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  // Delegated, registered once at module scope: survives view-transition navigation.
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as Element | null)?.closest<HTMLElement>('[data-copy-email]');
+    if (!btn) return;
+    const text = btn.dataset.copyEmail ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch {}
+      ta.remove();
+    }
+    const idle = btn.querySelector<HTMLElement>('[data-copy-idle]');
+    const done = btn.querySelector<HTMLElement>('[data-copy-done]');
+    if (!idle || !done) return;
+    idle.hidden = true;
+    done.hidden = false;
+    window.setTimeout(() => {
+      idle.hidden = false;
+      done.hidden = true;
+    }, 1800);
+  });
+</script>
