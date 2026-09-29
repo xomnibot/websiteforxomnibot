@@ -21,6 +21,14 @@ const counts = Object.fromEntries(COLLECTIONS.map((c, i) => [c, perCollection[i]
   number
 >;
 
+const tagCount = new Set(allEntries.flatMap((e) => e.data.tags ?? [])).size;
+const stats = [
+  { label: 'Writeups published', value: String(counts.writeups) },
+  { label: 'Posts in total', value: String(allEntries.length) },
+  { label: 'Topics covered', value: String(tagCount) },
+  { label: 'Hacking since', value: '2023' },
+];
+
 const featured = allEntries.filter((e) => e.data.featured).slice(0, 3);
 const latest = allEntries.slice(0, 6);
 const pageTitle = `${siteConfig.name} — ${siteConfig.tagline}`;
@@ -30,7 +38,7 @@ const pageTitle = `${siteConfig.name} — ${siteConfig.tagline}`;
   <Hero />
 
   <Container class="py-12 sm:py-16">
-    <StatsRow stats={siteConfig.stats} />
+    <StatsRow stats={stats} />
   </Container>
 
   {

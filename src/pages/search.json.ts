@@ -5,7 +5,7 @@
  * just explicit about intent.
  *
  * One entry per published content-collection item, plus a handful of
- * hand-written entries for static pages (About, Contact, YouTube, Tags).
+ * hand-written entries for static pages (About, Contact, Tags).
  */
 import type { APIRoute } from 'astro';
 import { render } from 'astro:content';
@@ -96,23 +96,13 @@ function staticPageEntries(): SearchEntry[] {
     },
     {
       title: 'Contact',
-      description: `Get in touch with ${siteConfig.persona.handle} — email, GitHub, LinkedIn, X.`,
+      description: `Get in touch with ${siteConfig.persona.handle} — email and GitHub.`,
       href: '/contact',
       collection: 'page',
       tags: [],
       date: buildDate,
       headings: [],
-      text: `Contact email GitHub LinkedIn X Twitter ${siteConfig.socials.email} ${siteConfig.socials.github} ${siteConfig.socials.linkedin} ${siteConfig.socials.x}`,
-    },
-    {
-      title: 'YouTube',
-      description: `Videos from ${siteConfig.persona.handle} — ${siteConfig.currentFocus.nextVideo}.`,
-      href: '/youtube',
-      collection: 'page',
-      tags: [],
-      date: buildDate,
-      headings: [],
-      text: `YouTube channel videos uploads ${siteConfig.currentFocus.nextVideo}`,
+      text: `Contact email GitHub ${siteConfig.socials.email} ${siteConfig.socials.github}`,
     },
     {
       title: 'Tags',

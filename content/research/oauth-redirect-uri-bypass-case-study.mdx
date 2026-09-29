@@ -1,20 +1,17 @@
 ---
-title: "Dissecting CVE-2026-1337: OAuth 2.0 State Traversal & Account Takeover"
-description: "Deep dive analysis of an OAuth 2.0 redirect parameter validation flaw allowing attackers to hijack authentication codes via wildcard domain matching."
+title: "Case Study: OAuth 2.0 Redirect URI Bypass & Account Takeover"
+description: "Reproducing a classic OAuth 2.0 redirect_uri validation flaw in a self-built lab: how loose prefix matching leaks authorization codes, and how to fix it."
 date: 2026-08-04
-cve: "CVE-2026-1337"
 category: "Vulnerability Research"
 tags: ["oauth", "authentication", "web-security", "account-takeover"]
-cover: "/media/research/cve-2026-1337-oauth-bypass/banner.png"
-coverAlt: "CVE-2026-1337 research banner"
 featured: true
-impact: "Critical (CVSS 9.8)"
-affectedSystems: "OAuth 2.0 Auth Servers v1.0.0 - v2.4.1"
+impact: "Account takeover (lab reproduction)"
+affectedSystems: "Self-built OAuth 2.0 authorization server (Node.js lab)"
 ---
 
 ### Executive Summary
 
-During recent security audits, a critical logic vulnerability was identified in standard OAuth 2.0 redirect URI verification routines. By exploiting sub-domain wildcard matching rules, an unauthenticated attacker can redirect authorization codes to an attacker-controlled endpoint and achieve complete account takeover.
+This is a lab case study of a well-known class of OAuth 2.0 bug: weak `redirect_uri` validation. I built a small authorization server that validates redirect URIs with a loose prefix check, then exploited it to send authorization codes to an attacker-controlled host and take over the victim's account. The same pattern has shown up in real bug-bounty reports, which is why it's worth understanding end to end.
 
 ---
 

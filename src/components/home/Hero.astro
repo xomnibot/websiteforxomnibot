@@ -4,13 +4,13 @@ import Container from '@/components/ui/Container.astro';
 import Button from '@/components/ui/Button.astro';
 import BrandIcon from '@/components/ui/BrandIcon.astro';
 import { siteConfig } from '@/lib/site';
-import { ArrowRight, Crosshair, FlaskConical, Wrench, Video } from '@lucide/astro';
+import { ArrowRight, GraduationCap, FlaskConical, Wrench, FileText } from '@lucide/astro';
 
 const focus = [
-  { label: 'Target', value: siteConfig.currentFocus.activeTarget, Icon: Crosshair },
+  { label: 'Learning', value: siteConfig.currentFocus.learning, Icon: GraduationCap },
   { label: 'Research', value: siteConfig.currentFocus.currentResearch, Icon: FlaskConical },
   { label: 'Building', value: siteConfig.currentFocus.activeTool, Icon: Wrench },
-  { label: 'Next video', value: siteConfig.currentFocus.nextVideo, Icon: Video },
+  { label: 'Next writeup', value: siteConfig.currentFocus.nextWriteup, Icon: FileText },
 ];
 ---
 

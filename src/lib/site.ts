@@ -25,7 +25,6 @@ export const siteConfig = {
       'Broke my own homelab more times than any CTF box — and learned more from fixing it.',
       'Weekend ritual: one retired Hack The Box machine, one writeup.',
       'Believes knowledge is best when shared with zero gatekeeping.',
-      'Fueled by cold brew and dark mode UIs.',
     ],
     rig: {
       os: 'Arch Linux (Hyprland) + Kali VM',
@@ -35,26 +34,16 @@ export const siteConfig = {
     },
   },
 
-  stats: [
-    { label: 'CTF Machines Solved', value: '50+' },
-    { label: 'CVE Research Papers', value: '10+' },
-    { label: 'Open Source Tools', value: '5+' },
-    { label: 'GitHub Stars', value: '2.5k+' },
-  ],
-
   socials: {
     github: 'https://github.com/xomnibot',
-    youtube: 'https://youtube.com/@xomnibot',
-    linkedin: 'https://linkedin.com/in/xomnibot',
-    x: 'https://x.com/xomnibot',
-    email: 'contact@xomnibot.in',
+    email: 'omnibotx.contact@gmail.com',
   },
 
   currentFocus: {
-    activeTarget: 'V8 JIT Engine Optimization Bypasses',
-    currentResearch: 'CVE-2026 OAuth & JWT Logic Flaws',
-    activeTool: 'OmniScanner v1.5 - Binary Vulnerability Triage',
-    nextVideo: 'Exploiting Linux Kernel Drivers for Fun',
+    learning: 'Hack The Box — Active Directory track',
+    currentResearch: 'OAuth 2.0 & JWT implementation flaws',
+    activeTool: 'OmniScanner v1.5 — PE support',
+    nextWriteup: 'PortSwigger practitioner labs: SSRF',
   },
 
   skills: {
@@ -76,14 +65,13 @@ export const nav: { primary: NavItem[]; secondary: NavItem[] } = {
   primary: [
     { label: 'Home', href: '/' },
     { label: 'Writeups', href: '/writeups' },
-    { label: 'Research', href: '/research' },
     { label: 'Projects', href: '/projects' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Cheatsheets', href: '/cheatsheets' },
     { label: 'About', href: '/about' },
   ],
   secondary: [
-    { label: 'YouTube', href: '/youtube' },
+    { label: 'Research', href: '/research' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Cheatsheets', href: '/cheatsheets' },
     { label: 'Contact', href: '/contact' },
     { label: 'Tags', href: '/tags' },
     { label: 'RSS', href: '/rss.xml' },

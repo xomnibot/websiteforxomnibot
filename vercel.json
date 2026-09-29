@@ -21,5 +21,17 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/youtube",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/research/cve-2026-1337-oauth-bypass",
+      "destination": "/research/oauth-redirect-uri-bypass-case-study",
+      "permanent": true
+    }
   ]
 }
