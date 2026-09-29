@@ -149,7 +149,7 @@ const ogImageURL = new URL(image ?? '/og-default.png', Astro.site).toString();
 
     <div class="relative flex min-h-screen flex-col">
       <Header />
-      <main id="main" class="min-h-svh flex-1">
+      <main id="main" class="min-h-screen min-h-svh flex-1">
         <slot />
       </main>
       <Footer />

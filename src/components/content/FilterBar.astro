@@ -91,6 +91,8 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
   <button
     type="button"
     data-filter-clear
+    data-filter-clear-inline
+    hidden
     class="inline-flex items-center gap-1.5 font-mono text-xs text-subtle transition-colors hover:text-accent"
   >
     <X class="size-3.5" /> Clear filters
@@ -108,6 +110,7 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
     const countEl = document.querySelector<HTMLElement>('[data-result-count]');
     const textInput = bar.querySelector<HTMLInputElement>('[data-filter-text]');
     const chipButtons = Array.from(bar.querySelectorAll<HTMLButtonElement>('[data-filter-value]'));
+    const inlineClear = bar.querySelector<HTMLElement>('[data-filter-clear-inline]');
     const clearButtons = document.querySelectorAll<HTMLButtonElement>('[data-filter-clear]');
 
     const groupKeys = [...new Set(chipButtons.map((b) => b.dataset.filterGroup ?? ''))].filter(Boolean);
@@ -146,6 +149,8 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
       });
 
       if (countEl) countEl.textContent = String(visible);
+      const anyActive = Boolean(state.q.trim()) || groupKeys.some((g) => Boolean(state[g]));
+      inlineClear?.toggleAttribute('hidden', !anyActive);
       if (emptyState) emptyState.hidden = visible !== 0;
 
       const next = new URLSearchParams();

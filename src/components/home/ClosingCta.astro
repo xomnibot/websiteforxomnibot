@@ -2,7 +2,6 @@
 /** Closing CTA. */
 import Button from '@/components/ui/Button.astro';
 import BrandIcon from '@/components/ui/BrandIcon.astro';
-import { Rss } from '@lucide/astro';
 import { siteConfig } from '@/lib/site';
 ---
 
@@ -11,16 +10,12 @@ import { siteConfig } from '@/lib/site';
   <div class="relative mx-auto max-w-xl">
     <h2 class="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">Follow the work as it ships.</h2>
     <p class="mt-3 text-muted">
-      New writeups, research and tools land here first. Follow along on GitHub or subscribe by RSS.
+      New writeups, research and tools land here first. Follow along on GitHub.
     </p>
     <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
       <Button href={siteConfig.socials.github} target="_blank" rel="noreferrer" variant="primary">
         <BrandIcon name="github" class="size-4" />
         GitHub
-      </Button>
-      <Button href="/rss.xml" variant="secondary">
-        <Rss class="size-4" />
-        RSS
       </Button>
     </div>
   </div>

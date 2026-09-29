@@ -36,6 +36,9 @@ export const siteConfig = {
 
   socials: {
     github: 'https://github.com/xomnibot',
+    linkedin: 'https://linkedin.com/in/xomnibot',
+    youtube: 'https://youtube.com/@xomnibot',
+    instagram: 'https://instagram.com/xomnibot',
     email: 'omnibotx.contact@gmail.com',
   },
 
@@ -74,6 +77,5 @@ export const nav: { primary: NavItem[]; secondary: NavItem[] } = {
     { label: 'Cheatsheets', href: '/cheatsheets' },
     { label: 'Contact', href: '/contact' },
     { label: 'Tags', href: '/tags' },
-    { label: 'RSS', href: '/rss.xml' },
   ],
 };

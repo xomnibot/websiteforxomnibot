@@ -15,6 +15,12 @@ import type { BadgeTone } from '@/components/ui/Badge.astro';
 import { Swords, ShieldHalf, Code, BrainCircuit, Sparkles, Monitor, SquareTerminal, Cpu, PenTool, Check, ArrowUpRight, CircleCheck, CircleDot, Circle } from '@lucide/astro';
 
 const projectStatusTone: Record<string, BadgeTone> = { Active: 'green', Stable: 'blue', Archived: 'neutral' };
+const aboutSocials = [
+  { href: siteConfig.socials.github, label: 'GitHub', brand: 'github' as const },
+  { href: siteConfig.socials.linkedin, label: 'LinkedIn', brand: 'linkedin' as const },
+  { href: siteConfig.socials.youtube, label: 'YouTube', brand: 'youtube' as const },
+  { href: siteConfig.socials.instagram, label: 'Instagram', brand: 'instagram' as const },
+];
 const learningIcon = { Completed: CircleCheck, 'In progress': CircleDot, Next: Circle } as const;
 
 const skillGroups = [
@@ -200,15 +206,17 @@ const rig = [
       </p>
       <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
         <Button href="/contact" variant="primary">Contact me</Button>
-        <a
-          href={siteConfig.socials.github}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
-          class="inline-flex size-10 items-center justify-center rounded-lg border border-line text-muted transition-colors hover:border-accent/40 hover:text-accent"
-        >
-          <BrandIcon name="github" />
-        </a>
+        {aboutSocials.map((s) => (
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={s.label}
+            class="inline-flex size-10 items-center justify-center rounded-lg border border-line text-muted transition-colors hover:border-accent/40 hover:text-accent"
+          >
+            <BrandIcon name={s.brand} />
+          </a>
+        ))}
       </div>
     </div>
   </Container>
