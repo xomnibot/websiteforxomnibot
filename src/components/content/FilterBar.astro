@@ -8,6 +8,7 @@
  * mirrors state into the URL query string (?q=&category=&platform=...) so
  * filtered links are shareable and pre-apply on arrival.
  */
+import ViewToggle from './ViewToggle.astro';
 import { X } from '@lucide/astro';
 import type { AnyEntry, CollectionKey } from '@/lib/collections';
 
@@ -55,13 +56,16 @@ const visibleGroups = groups.filter((g) => g.values.length > 1);
 ---
 
 <div data-filter-bar class="space-y-4">
+  <div class="flex items-center gap-3">
   <input
     type="search"
     data-filter-text
     placeholder="Search title, description, tags..."
     aria-label={`Search ${collection}`}
-    class="w-full rounded-lg border border-line bg-elevated px-3.5 py-2.5 text-sm text-fg placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    class="min-w-0 flex-1 rounded-lg border border-line bg-elevated px-3.5 py-2.5 text-sm text-fg placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
   />
+  <ViewToggle />
+  </div>
 
   {visibleGroups.length > 0 && (
     <div class="space-y-3">

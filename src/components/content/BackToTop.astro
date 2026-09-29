@@ -1,0 +1,22 @@
+---
+import { ArrowUp } from '@lucide/astro';
+---
+
+<button type="button" class="back-to-top" data-back-to-top aria-label="Back to top">
+  <ArrowUp class="size-4" />
+</button>
+
+<script>
+  function sync() {
+    const b = document.querySelector<HTMLElement>('[data-back-to-top]');
+    if (b) b.dataset.visible = String(window.scrollY > 700);
+  }
+  window.addEventListener('scroll', sync, { passive: true });
+  document.addEventListener('astro:page-load', sync);
+  document.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('[data-back-to-top]')) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    }
+  });
+</script>

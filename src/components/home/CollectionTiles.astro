@@ -20,31 +20,31 @@ const icons: Record<CollectionKey, typeof ShieldHalf> = {
 };
 ---
 
-<div class={`grid gap-3 sm:grid-cols-2 lg:grid-cols-5 ${className}`}>
+<div class={`grid gap-4 sm:grid-cols-2 lg:grid-cols-6 ${className}`}>
   {
-    COLLECTIONS.map((key) => {
+    COLLECTIONS.map((key, i) => {
       const meta = collectionMeta[key];
       const Icon = icons[key];
       const count = counts[key] ?? 0;
       return (
         <a
           href={meta.href}
-          data-spotlight
-          class="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-line bg-elevated p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40"
+          class={`group flex flex-col gap-4 ${i < 3 ? "lg:col-span-2" : "lg:col-span-3"} rounded-xl border border-line bg-elevated p-5 transition-colors hover:border-line-strong hover:bg-surface`}
         >
-          <div class="relative z-[2] flex flex-1 flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <span class="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-surface text-accent">
-                <Icon class="size-4" />
-              </span>
+          <div class="flex items-center justify-between">
+            <span class="inline-flex size-10 items-center justify-center rounded-lg border border-line bg-surface text-accent">
+              <Icon class="size-5" />
+            </span>
+            <span class="font-mono text-xs text-subtle">
+              {count} {count === 1 ? 'post' : 'posts'}
+            </span>
+          </div>
+          <div>
+            <h3 class="flex items-center gap-1.5 font-semibold text-fg">
+              {meta.label}
               <ArrowUpRight class="size-4 text-subtle transition-colors group-hover:text-accent" />
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-fg">{meta.label}</p>
-              <p class="mt-0.5 font-mono text-xs text-subtle">
-                {count} {count === 1 ? 'entry' : 'entries'}
-              </p>
-            </div>
+            </h3>
+            <p class="mt-1.5 text-sm text-muted">{meta.description}</p>
           </div>
         </a>
       );

@@ -1,0 +1,77 @@
+---
+/**
+ * Segmented Card / List switch for listing pages. Works with ListingView
+ * (the container carrying data-view). Preference is stored in localStorage
+ * under `xo-listing-view` and shared by every listing page.
+ */
+import { LayoutGrid, List } from '@lucide/astro';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+const btn =
+  'inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-accent aria-pressed:bg-elevated aria-pressed:text-accent aria-pressed:shadow-sm aria-pressed:ring-1 aria-pressed:ring-line-strong';
+---
+
+<div
+  data-view-toggle
+  role="group"
+  aria-label="Layout"
+  class:list={['inline-flex shrink-0 items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5', className]}
+>
+  <button type="button" data-view-option="grid" aria-pressed="true" aria-label="Card view" title="Card view" class={btn}>
+    <LayoutGrid class="size-4" aria-hidden="true" />
+  </button>
+  <button type="button" data-view-option="list" aria-pressed="false" aria-label="List view" title="List view" class={btn}>
+    <List class="size-4" aria-hidden="true" />
+  </button>
+</div>
+
+<script>
+  const KEY = 'xo-listing-view';
+
+  function currentView(): 'grid' | 'list' {
+    try {
+      return localStorage.getItem(KEY) === 'list' ? 'list' : 'grid';
+    } catch {
+      return 'grid';
+    }
+  }
+
+  function applyView(view: string) {
+    document.querySelectorAll<HTMLElement>('[data-view-container]').forEach((el) => {
+      el.dataset.view = view;
+    });
+    document.querySelectorAll<HTMLButtonElement>('[data-view-option]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.viewOption === view));
+    });
+  }
+
+  function initViewToggle() {
+    applyView(currentView());
+    const group = document.querySelector<HTMLElement>('[data-view-toggle]');
+    if (!group || group.dataset.bound) return;
+    group.dataset.bound = '1';
+    const opts = Array.from(group.querySelectorAll<HTMLButtonElement>('[data-view-option]'));
+    opts.forEach((b, i) => {
+      b.addEventListener('click', () => {
+        const v = b.dataset.viewOption ?? 'grid';
+        try {
+          localStorage.setItem(KEY, v);
+        } catch {}
+        applyView(v);
+      });
+      b.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        const next = opts[(i + (e.key === 'ArrowRight' ? 1 : opts.length - 1)) % opts.length];
+        next.focus();
+        next.click();
+      });
+    });
+  }
+
+  initViewToggle();
+  document.addEventListener('astro:page-load', initViewToggle);
+</script>

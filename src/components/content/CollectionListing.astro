@@ -11,6 +11,7 @@ import SectionHeading from '@/components/ui/SectionHeading.astro';
 import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
 import FilterBar from './FilterBar.astro';
 import PostGrid from './PostGrid.astro';
+import ListingView from './ListingView.astro';
 import EmptyState from './EmptyState.astro';
 import { getPublished, collectionMeta, type CollectionKey } from '@/lib/collections';
 
@@ -43,7 +44,9 @@ const entries = await getPublished(collection);
     ) : (
       <div class="space-y-8">
         <FilterBar collection={collection} entries={entries} />
-        <PostGrid entries={entries} />
+        <ListingView>
+          <PostGrid entries={entries} />
+        </ListingView>
         <EmptyState />
       </div>
     )}

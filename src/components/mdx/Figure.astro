@@ -8,7 +8,7 @@ interface Props {
 const { src, alt, caption } = Astro.props;
 ---
 
-<figure class="not-prose my-6">
+<figure class="mdx-figure not-prose my-6">
   <img src={src} alt={alt} loading="lazy" decoding="async" class="w-full rounded-xl border border-line" />
   {caption && <figcaption class="mt-2 text-center text-sm text-subtle">{caption}</figcaption>}
 </figure>

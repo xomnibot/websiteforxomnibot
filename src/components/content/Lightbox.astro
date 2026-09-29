@@ -1,0 +1,117 @@
+---
+/**
+ * Site-wide image lightbox for posts. One native <dialog> (focus trap, Esc
+ * and inert background come for free). Handlers are delegated on `document`
+ * and registered once at module scope, so they survive view transitions; the
+ * dialog is looked up lazily at click time. On every astro:page-load, plain
+ * Markdown body images are enhanced (zoomable + alt caption) — no author
+ * changes needed.
+ */
+import { X } from '@lucide/astro';
+---
+
+<dialog class="lightbox" id="lightbox" aria-label="Image viewer" data-lightbox>
+  <button type="button" class="lightbox-close" data-lb-close aria-label="Close image viewer"><X class="size-5" /></button>
+  <div class="lightbox-stage" data-lb-close>
+    <img alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-lb-img />
+    <p data-lb-caption hidden></p>
+  </div>
+</dialog>
+
+<script>
+  let lastFocus: HTMLElement | null = null;
+
+  function dlg() {
+    return document.getElementById('lightbox') as HTMLDialogElement | null;
+  }
+
+  function openLightbox(src: string, alt: string, from: HTMLElement | null) {
+    const d = dlg();
+    if (!d) return;
+    const img = d.querySelector<HTMLImageElement>('[data-lb-img]')!;
+    const cap = d.querySelector<HTMLElement>('[data-lb-caption]')!;
+    img.src = src;
+    img.alt = alt;
+    cap.textContent = alt;
+    cap.hidden = !alt;
+    lastFocus = from;
+    if (!d.open) d.showModal();
+    d.querySelector<HTMLElement>('.lightbox-close')?.focus();
+  }
+
+  function closeLightbox() {
+    const d = dlg();
+    if (d?.open) d.close();
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement | null;
+    if (!t) return;
+    const d = dlg();
+    if (d?.open) {
+      // Close on backdrop / stage / close-button clicks, but not on the image itself.
+      if (t === d || t.closest('[data-lb-close]') && !t.matches('[data-lb-img], [data-lb-caption]')) closeLightbox();
+      return;
+    }
+    const cover = t.closest<HTMLElement>('[data-cover-zoom]');
+    if (cover) {
+      const img = cover.querySelector('img');
+      openLightbox(cover.dataset.full || img?.currentSrc || img?.src || '', img?.alt ?? '', cover);
+      return;
+    }
+    const img = t.closest<HTMLImageElement>('img[data-zoomable]');
+    if (img) openLightbox(img.currentSrc || img.src, img.alt, img);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const t = e.target as HTMLElement;
+    if ((e.key === 'Enter' || e.key === ' ') && t.matches?.('img[data-zoomable]')) {
+      e.preventDefault();
+      const img = t as HTMLImageElement;
+      openLightbox(img.currentSrc || img.src, img.alt, img);
+    }
+  });
+
+  // dialog 'close' doesn't bubble; capture it to restore focus.
+  document.addEventListener(
+    'close',
+    (e) => {
+      if ((e.target as HTMLElement).id === 'lightbox') {
+        lastFocus?.focus?.();
+        lastFocus = null;
+      }
+    },
+    true,
+  );
+
+  document.addEventListener('astro:before-swap', closeLightbox);
+
+  function enhanceImages() {
+    document.querySelectorAll<HTMLImageElement>('.post-body .prose img').forEach((img) => {
+      if (img.dataset.zoomable || img.closest('a') || img.hasAttribute('data-no-zoom')) return;
+      img.dataset.zoomable = '';
+      img.tabIndex = 0;
+      img.setAttribute('role', 'button');
+      img.setAttribute('aria-haspopup', 'dialog');
+      if (!img.hasAttribute('loading')) img.loading = 'lazy';
+      const alt = img.alt.trim();
+      if (alt && !img.closest('figure')) {
+        const fig = document.createElement('figure');
+        fig.className = 'post-figure';
+        const cap = document.createElement('figcaption');
+        cap.textContent = alt;
+        const host = img.parentElement;
+        // A paragraph holding only this image is replaced by the figure.
+        if (host?.tagName === 'P' && host.childNodes.length === 1) {
+          host.replaceWith(fig);
+        } else {
+          img.replaceWith(fig);
+        }
+        fig.append(img, cap);
+      }
+    });
+  }
+
+  enhanceImages();
+  document.addEventListener('astro:page-load', enhanceImages);
+</script>

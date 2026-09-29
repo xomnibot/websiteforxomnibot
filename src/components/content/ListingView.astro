@@ -1,0 +1,24 @@
+---
+/**
+ * Wrapper carrying `data-view` ("grid" | "list") for a listing. The inline
+ * script runs synchronously as the element is parsed (and again after each
+ * view-transition swap), so the saved layout is applied before first paint.
+ * Children style themselves with `group-data-[view=list]/list:` variants.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div data-view-container data-view="grid" class:list={['group/list', className]}>
+  <script is:inline>
+    (function () {
+      try {
+        var s = document.currentScript;
+        if (s && s.parentElement && localStorage.getItem('xo-listing-view') === 'list') s.parentElement.dataset.view = 'list';
+      } catch (e) {}
+    })();
+  </script>
+  <slot />
+</div>

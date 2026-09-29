@@ -14,8 +14,8 @@ import { ToastHost, useToasts, cn } from './ui';
 
 type MainTab = 'new' | 'manage';
 
-export default function AdminApp() {
-  const [token, setToken] = useState<string | null>(() => getStoredToken());
+export default function AdminApp({ devToken }: { devToken?: string }) {
+  const [token, setToken] = useState<string | null>(() => getStoredToken() ?? devToken ?? null);
   const [tab, setTab] = useState<MainTab>('new');
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
   const [editorKey, setEditorKey] = useState(0);

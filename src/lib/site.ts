@@ -75,6 +75,7 @@ export const siteConfig = {
 
 export const nav: { primary: NavItem[]; secondary: NavItem[] } = {
   primary: [
+    { label: 'Home', href: '/' },
     { label: 'Writeups', href: '/writeups' },
     { label: 'Research', href: '/research' },
     { label: 'Projects', href: '/projects' },

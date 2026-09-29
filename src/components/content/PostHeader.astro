@@ -7,6 +7,7 @@ import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
 import Tag from '@/components/ui/Tag.astro';
 import EntryBadges from './EntryBadges.astro';
 import { collectionMeta, entryReadingTime, type AnyEntry } from '@/lib/collections';
+import { CalendarDays, Clock, RefreshCw, Maximize2 } from '@lucide/astro';
 import { formatDate, formatIsoDate } from '@/lib/utils';
 
 interface Props {
@@ -21,39 +22,52 @@ const meta = collectionMeta[entry.collection];
 <header class="space-y-5">
   <TerminalPrompt path={`~${meta.href}/${entry.id}`} />
 
-  <EntryBadges entry={entry} />
+  <div class:list={['gap-6', entry.data.cover && 'lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start']}>
+    <div class="min-w-0 space-y-5">
+      <EntryBadges entry={entry} />
 
-  <h1 class="text-3xl font-semibold tracking-tight text-fg sm:text-4xl">{entry.data.title}</h1>
+      <h1 class="text-3xl font-semibold tracking-tight text-fg sm:text-4xl">{entry.data.title}</h1>
 
-  {description && <p class="max-w-3xl text-lg text-muted">{description}</p>}
+      {description && <p class="max-w-3xl text-lg text-muted">{description}</p>}
 
-  <div class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-subtle">
-    <time datetime={formatIsoDate(entry.data.date)}>{formatDate(entry.data.date)}</time>
-    {entry.data.updated && (
-      <span class="inline-flex items-center gap-1">
-        Updated
-        <time datetime={formatIsoDate(entry.data.updated)}>{formatDate(entry.data.updated)}</time>
-      </span>
-    )}
-    <span>{entryReadingTime(entry)}</span>
-  </div>
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted">
+        <span class="inline-flex items-center gap-1.5">
+          <CalendarDays class="size-4 text-subtle" aria-hidden="true" />
+          <time datetime={formatIsoDate(entry.data.date)}>{formatDate(entry.data.date)}</time>
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <Clock class="size-4 text-subtle" aria-hidden="true" />
+          {entryReadingTime(entry)}
+        </span>
+        {entry.data.updated && (
+          <span class="inline-flex items-center gap-1.5 text-subtle">
+            <RefreshCw class="size-4" aria-hidden="true" />
+            Updated <time datetime={formatIsoDate(entry.data.updated)}>{formatDate(entry.data.updated)}</time>
+          </span>
+        )}
+      </div>
 
-  {entry.data.tags.length > 0 && (
-    <div class="flex flex-wrap gap-2">
-      {entry.data.tags.map((tag) => (
-        <Tag tag={tag} />
-      ))}
+      {entry.data.tags.length > 0 && (
+        <div class="flex flex-wrap gap-2">
+          {entry.data.tags.map((tag) => (
+            <Tag tag={tag} />
+          ))}
+        </div>
+      )}
     </div>
-  )}
 
-  {entry.data.cover && (
-    <img
-      src={entry.data.cover}
-      alt={entry.data.coverAlt ?? ''}
-      width="1200"
-      height="500"
-      fetchpriority="high"
-      class="aspect-[2/1] max-h-[520px] w-full rounded-xl border border-line object-cover sm:aspect-[12/5]"
-    />
-  )}
+    {entry.data.cover && (
+      <button
+        type="button"
+        data-cover-zoom
+        data-full={entry.data.cover}
+        aria-haspopup="dialog"
+        aria-label={`View cover image full size${entry.data.coverAlt ? `: ${entry.data.coverAlt}` : ''}`}
+        class="cover-thumb mt-6 aspect-[16/9] h-auto w-full max-w-sm lg:mt-0 lg:max-w-none"
+      >
+        <img src={entry.data.cover} alt={entry.data.coverAlt ?? ''} width="1200" height="675" fetchpriority="high" />
+        <span class="cover-hint" aria-hidden="true"><Maximize2 class="size-3" /> View</span>
+      </button>
+    )}
+  </div>
 </header>

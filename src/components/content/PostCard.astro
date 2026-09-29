@@ -54,15 +54,17 @@ const searchText = [entry.data.title, description, ...entry.data.tags].join(' ')
   data-severity={entry.collection === 'research' ? entry.data.severity ?? '' : undefined}
   data-status={entry.collection === 'projects' ? entry.data.status : undefined}
   class={cn(
-    'group relative flex h-full flex-col overflow-hidden rounded-xl border border-line bg-elevated transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40',
-    featured && 'sm:flex-row',
+    'group relative flex h-full flex-col overflow-hidden rounded-xl border border-line bg-elevated transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/40',
+    'group-data-[view=list]/list:h-auto group-data-[view=list]/list:flex-row group-data-[view=list]/list:items-center group-data-[view=list]/list:hover:translate-y-0',
+    featured && 'group-data-[view=grid]/list:sm:flex-row',
     className,
   )}
 >
   <div
     class={cn(
       'relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface',
-      featured && 'sm:aspect-auto sm:w-2/5',
+      featured && 'group-data-[view=grid]/list:sm:aspect-auto group-data-[view=grid]/list:sm:min-h-64 group-data-[view=grid]/list:sm:w-2/5',
+      'group-data-[view=list]/list:hidden group-data-[view=list]/list:sm:m-3 group-data-[view=list]/list:sm:block group-data-[view=list]/list:sm:aspect-[4/3] group-data-[view=list]/list:sm:w-28 group-data-[view=list]/list:sm:rounded-lg group-data-[view=list]/list:sm:border group-data-[view=list]/list:sm:border-line',
     )}
   >
     {entry.data.cover ? (
@@ -71,39 +73,43 @@ const searchText = [entry.data.title, description, ...entry.data.tags].join(' ')
         alt={entry.data.coverAlt ?? ''}
         loading="lazy"
         decoding="async"
-        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+        class={cn('h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]', featured && 'group-data-[view=grid]/list:sm:absolute group-data-[view=grid]/list:sm:inset-0')}
       />
     ) : (
       <div class="bg-grid absolute inset-0 flex items-center justify-center bg-surface">
-        <Glyph class="size-10 text-muted/30" aria-hidden="true" />
+        <Glyph class="size-10 text-subtle group-data-[view=list]/list:size-7" aria-hidden="true" />
       </div>
     )}
   </div>
 
-  <div class="relative z-[2] flex flex-1 flex-col gap-3 p-5">
-    <div class="flex flex-wrap items-center gap-1.5">
-      {featured && <Badge tone="accent">Featured</Badge>}
-      {showCollectionBadge && <Badge tone="neutral">{collectionMeta[entry.collection].singular}</Badge>}
-      <EntryBadges entry={entry} class="contents" />
+  <div
+    class="relative z-[2] flex flex-1 flex-col gap-3 p-5 group-data-[view=list]/list:gap-2 group-data-[view=list]/list:p-4 sm:group-data-[view=list]/list:flex-row sm:group-data-[view=list]/list:items-center sm:group-data-[view=list]/list:gap-6 sm:group-data-[view=list]/list:py-3 sm:group-data-[view=list]/list:pl-1 sm:group-data-[view=list]/list:pr-5"
+  >
+    <div class="flex min-w-0 flex-1 flex-col gap-3 group-data-[view=list]/list:gap-1.5">
+      <div class="flex flex-wrap items-center gap-1.5">
+        {featured && <Badge tone="accent">Featured</Badge>}
+        {showCollectionBadge && <Badge tone="neutral">{collectionMeta[entry.collection].singular}</Badge>}
+        <EntryBadges entry={entry} class="contents" />
+      </div>
+
+      <h3 class={cn('font-semibold tracking-tight text-fg group-hover:text-accent transition-colors', featured ? 'text-xl' : 'text-lg', 'group-data-[view=list]/list:text-base')}>{entry.data.title}</h3>
+      {description && <p class="line-clamp-2 text-sm text-muted group-data-[view=list]/list:line-clamp-1">{description}</p>}
+
+      {tags.length > 0 && (
+        <div class="flex flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <span class="inline-flex items-center rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-[0.6875rem] text-muted">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
 
-    <h3 class={cn('font-semibold tracking-tight text-fg', featured ? 'text-xl' : 'text-lg')}>{entry.data.title}</h3>
-    {description && <p class="line-clamp-2 text-sm text-muted">{description}</p>}
-
-    <div class="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 font-mono text-xs text-subtle">
+    <div class="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 font-mono text-xs text-muted group-data-[view=list]/list:mt-0 group-data-[view=list]/list:pt-0 sm:group-data-[view=list]/list:w-28 sm:group-data-[view=list]/list:shrink-0 sm:group-data-[view=list]/list:flex-col sm:group-data-[view=list]/list:items-end sm:group-data-[view=list]/list:gap-1 sm:group-data-[view=list]/list:text-right">
       <time datetime={formatIsoDate(date)}>{formatDate(date)}</time>
-      <span aria-hidden="true">·</span>
+      <span aria-hidden="true" class="sm:group-data-[view=list]/list:hidden">·</span>
       <span>{readingTime}</span>
     </div>
-
-    {tags.length > 0 && (
-      <div class="flex flex-wrap gap-1.5">
-        {tags.map((tag) => (
-          <span class="inline-flex items-center rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-[0.6875rem] text-muted">
-            #{tag}
-          </span>
-        ))}
-      </div>
-    )}
   </div>
 </a>

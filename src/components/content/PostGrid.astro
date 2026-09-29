@@ -21,11 +21,11 @@ const rest = featured ? entries.filter((e) => e !== featured) : entries;
 
 <div data-post-collection class={className}>
   {featured && (
-    <div class="mb-6">
+    <div class="mb-6 group-data-[view=list]/list:mb-3">
       <PostCard entry={featured} featured />
     </div>
   )}
-  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 group-data-[view=list]/list:grid-cols-1 group-data-[view=list]/list:gap-3 sm:group-data-[view=list]/list:grid-cols-1 lg:group-data-[view=list]/list:grid-cols-1">
     {rest.map((entry) => (
       <PostCard entry={entry} />
     ))}

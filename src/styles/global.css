@@ -20,17 +20,17 @@
   --border-strong: #d4d4d8;
   --fg: #09090b;
   --fg-muted: #52525b;
-  --fg-subtle: #71717a;
-  --accent: #059669;
+  --fg-subtle: #666670;
+  --accent: #047857;
   --accent-fg: #ffffff;
-  --accent-2: #0284c7;
+  --accent-2: #0369a1;
 
   /* status colors — used by Badge tones, difficulty/severity chips */
-  --status-green: #16a34a;
-  --status-amber: #d97706;
-  --status-orange: #ea580c;
+  --status-green: #15803d;
+  --status-amber: #b45309;
+  --status-orange: #c2410c;
   --status-red: #dc2626;
-  --status-blue: #0284c7;
+  --status-blue: #0369a1;
 }
 
 .dark {
@@ -41,7 +41,7 @@
   --border-strong: #33333b;
   --fg: #ededef;
   --fg-muted: #a1a1aa;
-  --fg-subtle: #71717a;
+  --fg-subtle: #8e8e98;
   --accent: #3ee6a0;
   --accent-fg: #04130c;
   --accent-2: #38bdf8;
@@ -261,8 +261,11 @@
    GFM tables/task-lists/footnotes and heading anchors from rehype-slug +
    rehype-autolink-headings.
 ----------------------------------------------------------------------- */
-@layer components {
-  .prose {
+/* NOTE: intentionally NOT inside @layer. The typography plugin emits its
+   default `.prose { --tw-prose-* }` (gray) values in a layer that outranks
+   `components`, which made body text/headings dark-on-dark in dark mode.
+   Unlayered rules always win over layered ones. */
+.prose {
     --tw-prose-body: var(--fg-muted);
     --tw-prose-headings: var(--fg);
     --tw-prose-lead: var(--fg-muted);
@@ -394,7 +397,6 @@
   .prose .expressive-code {
     margin: 1.75em 0;
   }
-}
 
 /* -----------------------------------------------------------------------
    Motion
@@ -410,4 +412,14 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* Expressive Code copy button: compact size (EC default is a 2.5rem box). */
+.expressive-code .frame .copy button {
+  width: 1.9rem;
+  height: 1.9rem;
+  margin: 0.5rem;
+}
+.expressive-code .frame .copy button::after {
+  margin: 0.4rem;
 }

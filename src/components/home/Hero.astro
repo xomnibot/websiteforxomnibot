@@ -1,0 +1,78 @@
+---
+/** Home hero: value statement, CTAs, and a "currently" focus card built from site data. */
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import BrandIcon from '@/components/ui/BrandIcon.astro';
+import { siteConfig } from '@/lib/site';
+import { ArrowRight, Crosshair, FlaskConical, Wrench, Video } from '@lucide/astro';
+
+const focus = [
+  { label: 'Target', value: siteConfig.currentFocus.activeTarget, Icon: Crosshair },
+  { label: 'Research', value: siteConfig.currentFocus.currentResearch, Icon: FlaskConical },
+  { label: 'Building', value: siteConfig.currentFocus.activeTool, Icon: Wrench },
+  { label: 'Next video', value: siteConfig.currentFocus.nextVideo, Icon: Video },
+];
+---
+
+<section class="relative overflow-hidden border-b border-line">
+  <div aria-hidden="true" class="bg-grid pointer-events-none absolute inset-0 opacity-60"></div>
+  <div aria-hidden="true" class="bg-glow pointer-events-none absolute inset-0 opacity-70"></div>
+  <Container class="relative py-16 sm:py-24 lg:py-28">
+    <div class="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full border border-line bg-elevated px-3 py-1 font-mono text-xs text-muted">
+          <span class="size-1.5 rounded-full bg-accent"></span>
+          {siteConfig.persona.handle} &middot; {siteConfig.persona.role}
+        </p>
+        <h1 class="mt-6 text-4xl font-semibold tracking-tight text-fg sm:text-5xl lg:text-6xl lg:leading-[1.05]">
+          {siteConfig.tagline}.
+        </h1>
+        <p class="mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+          {siteConfig.mission}
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <Button href="/writeups" variant="primary" size="lg">
+            Read writeups
+            <ArrowRight class="size-4" />
+          </Button>
+          <Button href="/about" variant="secondary" size="lg">About me</Button>
+          <a
+            href={siteConfig.socials.github}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHub"
+            class="inline-flex h-12 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted transition-colors hover:text-fg"
+          >
+            <BrandIcon name="github" class="size-4" />
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-line bg-elevated shadow-sm">
+        <div class="flex items-center justify-between border-b border-line px-5 py-3">
+          <p class="font-mono text-xs uppercase tracking-widest text-subtle">Currently</p>
+          <span class="flex items-center gap-1.5 font-mono text-xs text-muted">
+            <span class="size-1.5 rounded-full bg-accent"></span>
+            active
+          </span>
+        </div>
+        <ul class="divide-y divide-line">
+          {
+            focus.map(({ label, value, Icon }) => (
+              <li class="flex items-start gap-3 px-5 py-4">
+                <span class="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-line bg-surface text-accent">
+                  <Icon class="size-4" />
+                </span>
+                <div class="min-w-0">
+                  <p class="text-xs font-medium text-subtle">{label}</p>
+                  <p class="mt-0.5 text-sm text-fg">{value}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </Container>
+</section>

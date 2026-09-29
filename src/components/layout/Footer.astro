@@ -14,14 +14,14 @@ const socialLinks = [
 ];
 ---
 
-<footer class="border-t border-line">
-  <Container class="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+<footer class="mt-24 border-t border-line bg-elevated/40 sm:mt-32">
+  <Container class="grid gap-14 py-20 sm:grid-cols-2 lg:grid-cols-4 lg:gap-16 lg:py-24">
     <div class="lg:col-span-2">
       <a href="/" class="inline-flex items-center gap-1.5 font-mono text-base font-semibold text-fg">
         <span class="text-accent">&gt;_</span> xomnibot
       </a>
-      <p class="mt-3 max-w-sm text-sm text-muted">{siteConfig.description}</p>
-      <div class="mt-5 flex items-center gap-2">
+      <p class="mt-5 max-w-sm text-sm leading-relaxed text-muted">{siteConfig.description}</p>
+      <div class="mt-7 flex items-center gap-3">
         {
           socialLinks.map(({ href, label, brand }) => (
             <a
@@ -47,7 +47,7 @@ const socialLinks = [
 
     <div>
       <p class="font-mono text-xs uppercase tracking-widest text-subtle">Content</p>
-      <ul class="mt-4 space-y-2.5">
+      <ul class="mt-6 space-y-4">
         {
           nav.primary.map((item) => (
             <li>
@@ -62,7 +62,7 @@ const socialLinks = [
 
     <div>
       <p class="font-mono text-xs uppercase tracking-widest text-subtle">More</p>
-      <ul class="mt-4 space-y-2.5">
+      <ul class="mt-6 space-y-4">
         {
           nav.secondary.map((item) => (
             <li>
@@ -76,10 +76,9 @@ const socialLinks = [
     </div>
   </Container>
 
-  <div class="border-t border-line py-6">
+  <div class="border-t border-line py-8">
     <Container class="flex flex-col items-center justify-between gap-2 text-xs text-subtle sm:flex-row">
       <p>&copy; {year} xomnibot. All rights reserved.</p>
-      <p>Built with Astro &middot; Hosted on Vercel</p>
     </Container>
   </div>
 </footer>

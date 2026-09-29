@@ -1,82 +1,45 @@
 ---
-/** Bento-style grid of featured entries across all collections. */
+/** Up to three featured entries as equal cover cards. */
 import type { AnyEntry } from '@/lib/collections';
 import { collectionMeta, entryHref, entryDescription, entryReadingTime } from '@/lib/collections';
-import { difficultyTone, severityTone, statusTone } from '@/lib/badges';
-import Badge from '@/components/ui/Badge.astro';
-import { FileCode, ArrowUpRight } from '@lucide/astro';
+import { ImageIcon } from '@lucide/astro';
 
 interface Props {
   entries: AnyEntry[];
-  class?: string;
 }
-
-const { entries, class: className = '' } = Astro.props;
-
-function badgeFor(entry: AnyEntry): { label: string; tone: ReturnType<typeof difficultyTone> } | null {
-  if (entry.collection === 'writeups' && entry.data.difficulty) {
-    return { label: entry.data.difficulty, tone: difficultyTone(entry.data.difficulty) };
-  }
-  if (entry.collection === 'research' && entry.data.severity) {
-    return { label: entry.data.severity, tone: severityTone(entry.data.severity) };
-  }
-  if (entry.collection === 'projects') {
-    return { label: entry.data.status, tone: statusTone(entry.data.status) };
-  }
-  return null;
-}
+const { entries } = Astro.props;
 ---
 
-<div class={`grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 ${className}`}>
+<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
   {
-    entries.map((entry, i) => {
-      const meta = collectionMeta[entry.collection];
-      const badge = badgeFor(entry);
-      const big = i === 0;
-      return (
-        <a
-          href={entryHref(entry)}
-          data-spotlight
-          class={`group relative flex flex-col overflow-hidden rounded-xl border border-line bg-elevated transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 ${
-            big ? 'sm:col-span-2 lg:col-span-2 lg:row-span-2' : ''
-          }`}
-        >
-          <div class="relative z-[2] flex flex-1 flex-col">
-            <div class={`relative overflow-hidden border-b border-line bg-surface ${big ? 'aspect-[16/10]' : 'aspect-[16/9]'}`}>
-              {entry.data.cover ? (
-                <img
-                  src={entry.data.cover}
-                  alt={entry.data.coverAlt ?? ''}
-                  loading="lazy"
-                  class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                />
-              ) : (
-                <div class="flex size-full items-center justify-center bg-gradient-to-br from-surface to-elevated">
-                  <FileCode class="size-8 text-subtle" />
-                </div>
-              )}
-              <span class="absolute left-3 top-3 rounded-md border border-line-strong bg-bg/80 px-2 py-0.5 font-mono text-[0.6875rem] uppercase tracking-widest text-accent backdrop-blur">
-                {meta.eyebrow}
-              </span>
+    entries.map((entry) => (
+      <a
+        href={entryHref(entry)}
+        class="group flex flex-col overflow-hidden rounded-xl border border-line bg-elevated transition-colors hover:border-line-strong"
+      >
+        <div class="aspect-[16/9] overflow-hidden border-b border-line bg-surface">
+          {entry.data.cover ? (
+            <img
+              src={entry.data.cover}
+              alt={entry.data.coverAlt ?? ''}
+              loading="lazy"
+              class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div class="flex size-full items-center justify-center text-subtle">
+              <ImageIcon class="size-8" />
             </div>
-
-            <div class="flex flex-1 flex-col gap-2 p-4">
-              <div class="flex flex-wrap items-center gap-1.5">
-                {badge && <Badge tone={badge.tone}>{badge.label}</Badge>}
-                <Badge tone="neutral">{entry.data.category}</Badge>
-              </div>
-              <h3 class={`font-semibold tracking-tight text-fg ${big ? 'text-lg sm:text-xl' : 'text-base'}`}>
-                {entry.data.title}
-              </h3>
-              <p class={`text-muted ${big ? 'text-sm' : 'text-xs line-clamp-2'}`}>{entryDescription(entry)}</p>
-              <div class="mt-auto flex items-center justify-between pt-2 font-mono text-[0.6875rem] text-subtle">
-                <span>{entryReadingTime(entry)}</span>
-                <ArrowUpRight class="size-3.5 text-subtle transition-colors group-hover:text-accent" />
-              </div>
-            </div>
-          </div>
-        </a>
-      );
-    })
+          )}
+        </div>
+        <div class="flex flex-1 flex-col p-5">
+          <p class="font-mono text-xs uppercase tracking-widest text-accent">
+            {collectionMeta[entry.collection].singular}
+          </p>
+          <h3 class="mt-2 text-lg font-semibold leading-snug tracking-tight text-fg">{entry.data.title}</h3>
+          <p class="mt-2 line-clamp-2 text-sm text-muted">{entryDescription(entry)}</p>
+          <p class="mt-auto pt-4 font-mono text-xs text-subtle">{entryReadingTime(entry)}</p>
+        </div>
+      </a>
+    ))
   }
 </div>

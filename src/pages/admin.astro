@@ -7,8 +7,12 @@
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import AdminApp from '@/components/admin/AdminApp';
+
+// Local dev convenience: pre-fill the token from .env (GITHUB_TOKEN). Only read
+// when running `astro dev`, so it can never end up in the static build.
+const devToken = import.meta.env.DEV ? import.meta.env.GITHUB_TOKEN : undefined;
 ---
 
 <BaseLayout title="Admin" description="Publish new content to xomnibot.in." noindex>
-  <AdminApp client:only="react" />
+  <AdminApp client:only="react" devToken={devToken} />
 </BaseLayout>

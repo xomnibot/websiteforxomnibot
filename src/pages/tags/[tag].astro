@@ -3,6 +3,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/ui/Container.astro';
 import SectionHeading from '@/components/ui/SectionHeading.astro';
 import TerminalPrompt from '@/components/ui/TerminalPrompt.astro';
+import ListingView from '@/components/content/ListingView.astro';
+import ViewToggle from '@/components/content/ViewToggle.astro';
 import PostCard from '@/components/content/PostCard.astro';
 import { getAllTags, getAllPublished } from '@/lib/collections';
 import { slugify } from '@/lib/utils';
@@ -40,10 +42,15 @@ const description = `${entries.length} post${entries.length === 1 ? '' : 's'} ta
       />
     </div>
 
-    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {entries.map((entry) => (
-        <PostCard entry={entry} showCollectionBadge />
-      ))}
+    <div class="flex justify-end">
+      <ViewToggle />
     </div>
+    <ListingView>
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 group-data-[view=list]/list:grid-cols-1 group-data-[view=list]/list:gap-3 sm:group-data-[view=list]/list:grid-cols-1 lg:group-data-[view=list]/list:grid-cols-1">
+        {entries.map((entry) => (
+          <PostCard entry={entry} showCollectionBadge />
+        ))}
+      </div>
+    </ListingView>
   </Container>
 </BaseLayout>
